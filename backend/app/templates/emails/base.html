@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+  <style>
+    @media screen and (max-width:450px) {
+        .responsive {
+            float:left!important;
+            width:100%!important
+        }
+    }
+  </style>
+  </head>
+  <body>
+    <section class="content">
+      {% block header %}{% endblock %}
+      {% block content %}{% endblock %}
+      {% block footer %}{% endblock %}
+      <p>Thanks,</p>
+      <p>{{app_name}}</p>
+    </section>
+  </body>
+</html>

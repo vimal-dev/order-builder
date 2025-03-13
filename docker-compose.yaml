@@ -1,0 +1,62 @@
+networks:
+  orderbuilder:
+    driver: bridge
+
+volumes:
+  orderbuilder-cache-data:
+  orderbuilder-mysql-data:
+services:
+  backend:
+    build:
+      args:
+        - USER_UID=1000
+      context: ./backend
+      dockerfile: 'Dockerfile.dev'
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./backend:/code
+      - /code/.venv  # Prevents overwriting the Docker venv
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - orderbuilder
+
+  mysql:
+    platform: linux/amd64 #for platform error on Apple M1 chips
+    image: mysql:latest
+    restart: unless-stopped
+    volumes:
+      - orderbuilder-mysql-data:/var/lib/mysql #using a volume
+    ports:
+      - "33061:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_USER: "dev"
+      MYSQL_PASSWORD: "dev"
+      MYSQL_DATABASE: "app_db"
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    networks:
+      - orderbuilder
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./frontend/.env.docker
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    networks:
+      orderbuilder:
+        aliases:
+          - frontend

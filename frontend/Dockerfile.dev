@@ -1,0 +1,30 @@
+# Use the latest LTS version of Node.js
+FROM node:lts-alpine
+
+
+# ARG USERNAME=appuser
+# ARG USER_UID=1000
+# ARG USER_GID=$USER_UID
+
+# RUN addgroup --gid $USER_GID $USERNAME
+# RUN adduser --disabled-password --gecos '' -u $USER_UID -G $USERNAME $USERNAME
+ 
+# Set the working directory inside the container
+WORKDIR /app
+
+# USER node
+ 
+# Copy package.json and package-lock.json
+COPY --chown=node:node package*.json ./
+ 
+# Install dependencies
+RUN npm install
+ 
+# Copy the rest of your application files
+COPY --chown=node:node . .
+ 
+# Expose the port your app runs on
+EXPOSE 3000
+USER node
+# Define the command to run your app
+CMD ["npm", "run", "dev"]

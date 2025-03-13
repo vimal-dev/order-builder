@@ -1,0 +1,62 @@
+# Base stage
+FROM python:3.12-alpine AS base
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+ARG USERNAME=appuser
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN addgroup --gid $USER_GID $USERNAME && \
+    adduser --disabled-password --gecos '' -u $USER_UID -G $USERNAME $USERNAME && \
+    apk add --no-cache gcc libc-dev linux-headers mariadb-dev libmagic
+
+# Builder stage
+FROM base AS builder
+WORKDIR /code
+
+# Create and set up virtual environment
+RUN python -m venv .venv
+ENV PATH=.venv/bin:$PATH
+
+RUN pip install --upgrade pip && \
+    pip install poetry poetry-plugin-export
+
+COPY pyproject.toml poetry.lock ./
+RUN poetry export --without-hashes --without dev -f requirements.txt -o requirements.txt
+
+# Create and set up virtual environment
+# RUN python -m venv /code/.venv && \
+#     /code/.venv/bin/pip install -r requirements.txt && \
+#     chown -R appuser:appuser /code
+
+RUN pip install -r requirements.txt && \
+    chown -R appuser:appuser /code
+
+# Runner stage
+FROM base AS runner
+WORKDIR /code
+
+# Copy virtual environment from builder
+COPY --from=builder --chown=appuser:appuser /code/.venv /code/.venv
+
+# Copy application files
+COPY --chown=appuser:appuser app app
+COPY --chown=appuser:appuser gunicorn_config.py .
+COPY --chown=appuser:appuser entrypoint.sh .
+COPY --chown=appuser:appuser entrypoint-dev.sh .
+COPY --chown=appuser:appuser migrations migrations
+
+# Ensure scripts are executable
+RUN chmod +x entrypoint.sh entrypoint-dev.sh
+
+EXPOSE 5000
+
+USER appuser
+
+ENV PATH="/code/.venv/bin:$PATH"
+
+# CMD ["flask", "--app", "app.wsgi", "run", "--host=0.0.0.0"]
+
+ENTRYPOINT [ "/bin/sh", "entrypoint-dev.sh" ]

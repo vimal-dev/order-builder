@@ -1,0 +1,10 @@
+deploy
+.venv
+.env.docker
+.env.local
+.env
+.idea
+
+.git
+Dockerfile
+docker-compose.yaml

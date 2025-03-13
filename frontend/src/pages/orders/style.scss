@@ -1,0 +1,12 @@
+table {
+    &.table-striped{
+        tbody{
+            tr{
+                &.activated{
+                    color: green;
+                }
+            }
+        }
+        
+    }
+}
