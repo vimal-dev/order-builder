@@ -3,7 +3,7 @@ import { Table, Button, Spinner, Row, Col } from "react-bootstrap";
 import { useAuthenticatedAxios } from "../../hooks/useAxios";
 import { IOrder } from "../../types/order";
 import { Helmet } from "react-helmet-async";
-import {get as _get, debounce} from "lodash"
+import {get as _get} from "lodash"
 
 import config from "../../config";
 import { Link } from "react-router-dom";

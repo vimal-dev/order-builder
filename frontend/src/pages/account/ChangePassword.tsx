@@ -3,8 +3,7 @@ import { useFormik } from "formik";
 import { useState } from "react";
 import * as Yup from 'yup';
 import axios from "axios";
-import {get as _get} from "lodash"
-import ProfileService from "../../services/profile";
+import {get as _get} from "lodash";
 
 const FormSchema = Yup.object().shape({
     password_one: Yup.string().required('Password is required'),
@@ -23,7 +22,8 @@ const ChangePassword = () => {
         onSubmit: async(values, {setErrors}) => {
             setIsSubmitting(true);
             try {
-                const response = await ProfileService.changePassword(values);
+                console.log(values);
+                // const response = await ProfileService.changePassword(values);
             } catch (error: unknown) {
                 if (axios.isAxiosError(error)) {
                     if (error.response && error.response.status === 422) {

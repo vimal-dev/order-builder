@@ -14,12 +14,12 @@ export const AuthContext = createContext<AuthContextType>({
     refresh_token: null,
     tokenExpiresIn: () => -1,
     isTokenExpired: () => false,
-    login: async (token, refresh_token) => {},
-    updateTokens: (token, refresh_token) => {},
+    login: async (_token, _refresh_token) => {},
+    updateTokens: (_token, _refresh_token) => {},
     refreshAccessToken: async () => null,
     logout: async () => {},
     isAuthenticated: () => {return false;},
-    hasRole: (role: string) => {return false;},
+    hasRole: (_role: string) => {return false;},
 });
 
 export const AuthProvider = ({ children }: any) => {

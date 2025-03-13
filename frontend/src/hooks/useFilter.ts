@@ -247,7 +247,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
 
     const buildQuery = () => {
         const f: Array<Record<string, any>> = [];
-        selectedFilters.forEach((filter, i) => {
+        selectedFilters.forEach((filter) => {
             if (filter.field && filter.field.length && filter.operator && filter.operator.length) {
                 const obj: Record<string, any> = {
                     "column": filter.field,
@@ -337,7 +337,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
         setRefresh((refresh) => refresh + 1)
     }
 
-    const onFilterColumnSelectHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onFilterColumnSelectHandler = (_f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         if(value.length<=0) {
             return;
@@ -359,7 +359,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
         ]);
     }
 
-    const onFilterOperatorSelectHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
+    const onFilterOperatorSelectHandler = (_f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
         if(value.length<=0) {
             return;
@@ -403,10 +403,10 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
     }
 
     const resetNextToken = () => {
-      setMeta((state) => ({
-          ...meta,
-          next_token: null
-      }))
+      setMeta({
+        ...meta,
+        next_token: null
+    })
     };
 
     return {

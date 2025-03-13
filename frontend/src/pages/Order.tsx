@@ -22,6 +22,8 @@ const Order = () => {
     const [token, setToken] = useState<string | null>(null);
     const [tokenRequested, setTokenRequested] = useState<boolean>(false);
 
+    console.log(token)
+
     const formikLogin = useFormik({
         initialValues: {
             email: '',

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Row, Col, Card, CardText, Modal, Button, Form } from "react-bootstrap";
+import { Table, Row, Col, Card, CardText, Button, Form } from "react-bootstrap";
 import { useAuthenticatedAxios } from "../../hooks/useAxios";
 import { IAttachment, IOrder, IOrderItem } from "../../types/order";
 import { Helmet } from "react-helmet-async";
@@ -13,11 +13,11 @@ import { useParams } from "react-router-dom";
 import Attachment from "../../components/Attachment";
 import { toast } from "react-toastify";
 
-interface IUpdateStatus{
-    id: number | string | null;
-    status: string | null;
-    comment: string | null;
-}
+// interface IUpdateStatus{
+//     id: number | string | null;
+//     status: string | null;
+//     comment: string | null;
+// }
 
 const UploadSchema = Yup.object().shape({
     attached_file: Yup.mixed().required('File is required'),
@@ -35,6 +35,7 @@ const OrderView = () => {
     const [selected_order_item, setSelectedOrderItem] = useState<IOrderItem | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    console.log(loadingAttachments)
 
     const formikUpload = useFormik({
             initialValues: {
@@ -47,7 +48,7 @@ const OrderView = () => {
                     if (values.attached_file) {
                         const formData = new FormData();
                         formData.append("attached_file", values.attached_file);
-                        const response = await axios.post(`/orders/attachment/add/${selected_order_item?.id}`, formData, {
+                        await axios.post(`/orders/attachment/add/${selected_order_item?.id}`, formData, {
                             headers: {
                                 'Content-Type': 'multipart/form-data'
                             }
@@ -154,8 +155,11 @@ const OrderView = () => {
                                                     <Form.Control
                                                         type="file"
                                                         onChange={(event) => {
-                                                            const file = event.currentTarget.files[0];
-                                                            formikUpload.setFieldValue("attached_file", file);
+                                                            const input = event.currentTarget as HTMLInputElement;
+                                                            if (input.files && input.files.length > 0) {
+                                                                const file = input.files[0];
+                                                                formikUpload.setFieldValue("attached_file", file);
+                                                            }
                                                           }}
                                                     />
                                                     {formikUpload.touched.attached_file && formikUpload.errors.attached_file ? (

@@ -1,4 +1,4 @@
-import { Badge, Button, Card } from "react-bootstrap";
+import { Badge, Card } from "react-bootstrap";
 import { IAttachment } from "../types/order";
 import classNames from "classnames";
 import pdfImage from "./pdf-file.png";
