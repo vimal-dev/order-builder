@@ -12,6 +12,7 @@ import { AuthLayout } from "./layouts/AuthLayout";
 import OrderIndex from "./pages/orders/Index";
 import OrderView from "./pages/orders/View";
 import { ToastContainer } from "react-toastify";
+import Order from "./pages/Order";
 
 function App() {
   useEffect(() => {
@@ -41,6 +42,7 @@ function App() {
             </Route> 
           </Route>
           <Route element={<DefaultLayout/>}>
+            <Route path='/order-details' element={<Order />}/>
             <Route path='*' element={<NotFound />}/>
           </Route>
         </Routes>

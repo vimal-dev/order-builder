@@ -13,7 +13,7 @@ RUN adduser --disabled-password --gecos '' -u $USER_UID -G $USERNAME $USERNAME
 # RUN adduser --disabled-password --gecos '' appuser
 
 RUN apk add --update --no-cache --virtual .tmp-build-deps \
-  gcc libc-dev linux-headers pkgconfig mariadb-dev
+  gcc libc-dev linux-headers pkgconfig mariadb-dev libmagic
 
 # RUN apk add --update --no-cache --virtual .tmp-build-deps \
 #  gcc libc-dev linux-headers postgresql-dev \

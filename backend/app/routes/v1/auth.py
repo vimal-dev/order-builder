@@ -56,6 +56,7 @@ def login():
     }
     data = request.get_json()
     try:
+        debug = current_app.config.get("DEBUG")
         data = LoginSchema().load(data)
         user = db.session.query(User).filter_by(email=data.get("username")).first()
         if user and user.is_active:
@@ -63,12 +64,14 @@ def login():
             current_app.logger.info(interval)
             totp = pyotp.TOTP(user.mfa_secret, interval=interval)
             otp = totp.now()
-            #send_login_otp(user.email, otp)
+            if not debug:
+                send_login_otp(user.email, otp)
             response["code"] = 200
             response["message"] = "Otp sent please check your email"
-            response["data"] = {
-                "code": otp
-            }
+            if debug:
+                response["data"] = {
+                    "code": otp
+                }
         else:
             response["code"] = 401
             response["success"] = False
