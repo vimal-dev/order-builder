@@ -151,9 +151,6 @@ def attachments(current_user: User, item_id):
     order_by_column = desc(Attachment.created)
     query = query.order_by(order_by_column).limit(limit)
 
-    
-    print(query)
-
     results = db.session.execute(query).scalars().all()
 
     # Prepare next cursor
@@ -193,17 +190,16 @@ def add_attachment(current_user: User, item_id):
                 }
             )
             
-            url = f"{endpoint}/{bucket_name}/{filename}"
             attachment_model = Attachment(**{
                 "name": attached_file.filename,
                 "order_item_id": item_id,
                 "file": filename,
-                "status": Attachment.STATUS_PENDING
+                "status": Attachment.STATUS_WAITING_FOR_APPROVAL
             })
             db.session.add(attachment_model)
             db.session.flush()
             if attachment_model.id:
-                stmt_upd = update(Attachment).values(status=Attachment.STATUS_CLOSED).where(Attachment.order_item_id == item_id, Attachment.id != attachment_model.id)
+                stmt_upd = update(Attachment).values(status=Attachment.STATUS_REVISION_REQUESTED).where(Attachment.status == Attachment.STATUS_WAITING_FOR_APPROVAL, Attachment.order_item_id == item_id, Attachment.id != attachment_model.id)
                 db.session.execute(stmt_upd)
             db.session.commit()
             send_customer_attachment_update([order_item.order.customer_email], data={})
@@ -237,7 +233,15 @@ def update_attachment(current_user: User, attachment_id):
         if attachment is None:
             response["code"] = 404
             response["message"] = "Attachment not found"
-        attachment.status = data.get("status")
+        match(data.get("status")):
+            case "Accept":
+                attachment.status = Attachment.STATUS_DESIGN_APPROVED
+            case "Revision":
+                attachment.status = Attachment.STATUS_REVISION_REQUESTED
+            case _:
+                current_app.logger.info("Invalid status requested")
+        attachment.comment = data.get("comment")
+        db.session.commit()
     except ValidationError as err:
         response["code"] = 422
         response["success"] = False

@@ -173,9 +173,7 @@ const OrderView = () => {
                                                     </Button>
                                                 </div>
                                             </Form>
-                                        <Row className="gx-1">
-                                            {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment}></Attachment></Col>)}
-                                        </Row>
+                                            {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={(id, status) => console.log(`${id}: ${status}`)}></Attachment></Col>)}
                                     </CardText>
                                 </>
                             ) : (<>

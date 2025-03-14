@@ -37,10 +37,11 @@ class OrderItem(db.Model):
 class Attachment(db.Model):
     __tablename__ = 'core_order_item_attachments'
 
-    STATUS_PENDING = "Pending"
-    STATUS_ACCEPTED = "Accepted"
+    STATUS_WAITING_FOR_APPROVAL = "Waiting For Approval"
+    STATUS_DESIGN_APPROVED = "Design Approved"
+    STATUS_REVISION_REQUESTED = "Revision Requested"
+    STATUS_READY_FOR_PRODUCTION = "Ready For Production"
     STATUS_REJECTED = "Rejected"
-    STATUS_CLOSED = "Closed"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     order_item_id: Mapped[str] = mapped_column(
@@ -57,7 +58,7 @@ class Attachment(db.Model):
 
     @staticmethod
     def get_statuses():
-        return [Attachment.STATUS_ACCEPTED, Attachment.STATUS_PENDING, Attachment.STATUS_REJECTED]
+        return [Attachment.STATUS_WAITING_FOR_APPROVAL, Attachment.STATUS_DESIGN_APPROVED, Attachment.STATUS_REVISION_REQUESTED, Attachment.STATUS_READY_FOR_PRODUCTION, Attachment.STATUS_REJECTED]
 
 
 @event.listens_for(Order, "before_insert")

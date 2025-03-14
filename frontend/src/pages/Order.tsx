@@ -1,42 +1,48 @@
 import { Helmet } from 'react-helmet-async';
 import config from "../config";
-import { Button, Card, Col, Form, Row } from "react-bootstrap";
+import { Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import * as Yup from 'yup';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
 import * as coreAxios from 'axios';
 import { get as _get } from "lodash";
 import { useAxios } from '../hooks/useAxios';
+import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
+import Attachment from '../components/front/Attachment';
 
-const OrderLoginSchema = Yup.object().shape({
+const CredentialsSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     order_number: Yup.string().required('Order No. is required.'),
 });
 
-
+const StatusSchema = Yup.object().shape({
+    comment: Yup.string().required('Comment is required'),
+});
 
 
 const Order = () => {
     const axios = useAxios();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
-    const [tokenRequested, setTokenRequested] = useState<boolean>(false);
+    const [loading, setLoading] = useState(false);
+    const [order, setOrder] = useState<IOrder | null>(null);
+    const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [loadingAttachments, setLoadingAttachments] = useState(false);
+    const [selected_order_item, setSelectedOrderItem] = useState<IOrderItem | null>(null);
+    const [showModal, setShowModal] = useState(false);
 
-    console.log(token)
+    console.log(loadingAttachments);
 
-    const formikLogin = useFormik({
+    const formikCred = useFormik({
         initialValues: {
             email: '',
             order_number: ''
         },
-        validationSchema: OrderLoginSchema,
+        validationSchema: CredentialsSchema,
         onSubmit: async (values, { setErrors }) => {
-            setIsSubmitting(true);
+            setLoading(true);
             try {
-                //
-                formikOtp.setFieldValue("email", values.email)
-                formikOtp.setFieldValue("order_number", values.order_number)
-                setTokenRequested(true)
+                const response = await axios.post(`/o/details`, values);
+                setOrder(_get(response, "data.data", null));
             } catch (error: unknown) {
                 if (coreAxios.isAxiosError(error)) {
                     if (error.response && error.response.status === 422) {
@@ -44,24 +50,23 @@ const Order = () => {
                     }
                 }
             }
-            setIsSubmitting(false);
+            setLoading(false);
         },
     });
 
-    const formikOtp = useFormik({
+    const formikStatus = useFormik({
         initialValues: {
-            email: '',
-            order_number: '',
-            code: ''
+            id: null,
+            status: null,
+            comment: ""
         },
-        validationSchema: OrderLoginSchema,
+        validationSchema: StatusSchema,
         onSubmit: async (values, { setErrors }) => {
             setIsSubmitting(true);
             try {
-                // const params: Record<string, any> = {};
-                // const response = await axios.get("/orders", { params , headers: { Authorization: `Bearer ${token}` }});
-                const response = await axios.post("/orders/validate", values);
-                setToken(_get(response, "data.data", null))
+                await axios.post(`o/attachment/update/${selected_order_item?.id}/${values.id}`, { "status": values.status, "comment": values.comment });
+                fetchAttachments();
+                handleModalClose();
             } catch (error: unknown) {
                 if (coreAxios.isAxiosError(error)) {
                     if (error.response && error.response.status === 422) {
@@ -73,48 +78,147 @@ const Order = () => {
         },
     });
 
-  return (
-      <>
-          <Helmet>
-              <title>${config.title} - Order Details</title>
-          </Helmet>
-          <Row className="justify-content-md-center">
-          <Col md={8} lg={6} xs={12}>
+    const fetchAttachments = async () => {
+        if (!selected_order_item) {
+            return;
+        }
+        setLoadingAttachments(true);
+        try {
+            const params: Record<string, any> = {};
+            // if (nextCursor) params.cursor = nextCursor;
+            const response = await axios.get(`/o/attachments/${selected_order_item?.id}`, { params });
+            setAttachments(_get(response, "data.data.items", []));
+        } catch (error) {
+            console.error("Error fetching attachments", error);
+        }
+        setLoadingAttachments(false);
+    };
+
+    const handleStatus = (id: string | number | null, status: string | null) => {
+        formikStatus.setFieldValue("id", id);
+        formikStatus.setFieldValue("status", status);
+        setShowModal(true)
+    };
+
+    const handleModalClose = () => {
+        formikStatus.setFieldValue("id", null);
+        formikStatus.setFieldValue("status", null);
+        formikStatus.setFieldValue("comment", null);
+        setShowModal(false)
+    }
+
+    useEffect(() => {
+        fetchAttachments();
+    }, [selected_order_item]);
+
+    return (
+        <>
+            <Helmet>
+                <title>${config.title} - Order Details</title>
+            </Helmet>
+
+            {order ? (
+                <>
+                    <Col>
                         <div className="border border-3 border-tertiary"></div>
-                        <Card className="shadow rounded-0">
-                            <Card.Body>
-                                <div className="mb-3 mt-md-4">
-                                    <h2 className="fw-bold mb-2 text-uppercase">{config.title}</h2>
-                                    {tokenRequested ? <p className=" mb-5">Please enter OTP to login!</p>:<p className=" mb-5">Please enter your order details!</p>}
+                        <Row>
+                            <Col>
+                                <Row>
+                                    <Col>
+                                        <h2 className='mb-2 fw-50'>Orders {loading ? "Loading...." : order?.order_number}</h2>
+                                        <Table striped bordered hover>
+                                            <thead>
+                                                <tr>
+                                                    <th>Order Item</th>
+                                                    <th>Quantity</th>
+                                                    <th>Custom Design</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {order?.order_items.map(item => (
+                                                    <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
+                                                        <td>{item?.title}<strong>{item.sku}</strong></td>
+                                                        <td>{item?.quantity}</td>
+                                                        <td>{item?.custom_design || "N/A"}</td>
+                                                    </tr>
+                                                ))}
 
-                                    <div className="mb-3">
-                                    {tokenRequested ? (
-                                            <Form onSubmit={formikOtp.handleSubmit}>
-                                                <Form.Group className="mb-3" controlId="formBasicEmail">
-                                                    <Form.Label className="text-center">
-                                                        Enter OTP
-                                                    </Form.Label>
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Enter OTP"
-                                                        name="code"
-                                                        onChange={formikOtp.handleChange}
-                                                        onBlur={formikOtp.handleBlur}
-                                                        value={formikOtp.values.code}
-                                                    />
-                                                    {formikOtp.touched.code && formikOtp.errors.code ? (
-                                                        <Form.Control.Feedback type="invalid">{formikOtp.errors.code}</Form.Control.Feedback>
-                                                    ) : null}
-                                                </Form.Group>
+                                            </tbody>
+                                        </Table>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col>
+                                <Card>
+                                    <Card.Body>
+                                        {selected_order_item ? (
+                                            <>
+                                                <Card.Title>{selected_order_item?.title}</Card.Title>
+                                                <CardText>
+                                                    <p><strong>Custom Design: </strong>{selected_order_item?.custom_design || "N/A"}</p>
+                                                    <h5>Attachments</h5>
+                                                    {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={handleStatus}></Attachment></Col>)}
+                                                </CardText>
+                                            </>
+                                        ) : (<>
+                                            <Card.Title>Order Item Not Selected</Card.Title>
+                                            <CardText>
+                                                <p>Select an order item to load the attachments.</p>
+                                            </CardText>
+                                        </>)}
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Row>
+                        <Modal show={showModal} onHide={handleModalClose}>
+                            <Modal.Header closeButton>
+                                <Modal.Title>{formikStatus.values.status === "Accept"? "Accept Design":"Request Revision" }</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                <Form noValidate onSubmit={formikStatus.handleSubmit}>
+                                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                                        <Form.Label className="text-center">
+                                            Comment
+                                        </Form.Label>
+                                        <Form.Control
+                                            as="textarea"
+                                            rows={3}
+                                            placeholder="Your comment?"
+                                            name="comment"
+                                            onChange={formikStatus.handleChange}
+                                            onBlur={formikStatus.handleBlur}
+                                            value={formikStatus.values.comment}
+                                        />
+                                        {formikStatus.touched.comment && formikStatus.errors.comment ? (
+                                            <Form.Control.Feedback>{formikStatus.errors.comment}</Form.Control.Feedback>
+                                        ) : null}
+                                    </Form.Group>
 
-                                                <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting}>
-                                                        {isSubmitting ? "Please wait..." : "Login"}
-                                                    </Button>
-                                                </div>
-                                            </Form>
-                                            ):(
-                                            <Form noValidate onSubmit={formikLogin.handleSubmit}>
+                                    <div>
+                                        <Button className='rounded-0' variant="secondary" onClick={handleModalClose}>
+                                            Close
+                                        </Button>
+                                        <Button className='float-end rounded-0' variant="tertiary" type="submit" disabled={isSubmitting}>
+                                            {isSubmitting ? "Please wait..." : "Update"}
+                                        </Button>
+                                    </div>
+                                </Form>
+                            </Modal.Body>
+                        </Modal>
+                    </Col>
+                </>
+            ) : (
+                <>
+                    <Row className="justify-content-md-center">
+                        <Col md={8} lg={6} xs={12}>
+                            <div className="border border-3 border-tertiary"></div>
+                            <Card className="shadow rounded-0">
+                                <Card.Body>
+                                    <div className="mb-3 mt-md-4">
+                                        <h2 className="fw-bold mb-2 text-uppercase">{config.title}</h2>
+                                        <p className=" mb-5">Please enter your order details!</p>
+                                        <div className="mb-3">
+                                            <Form noValidate onSubmit={formikCred.handleSubmit}>
                                                 <Form.Group className="mb-3" controlId="formBasicEmail">
                                                     <Form.Label className="text-center">
                                                         Email address
@@ -123,13 +227,13 @@ const Order = () => {
                                                         type="email"
                                                         placeholder="Enter email"
                                                         name="email"
-                                                        onChange={formikLogin.handleChange}
-                                                        onBlur={formikLogin.handleBlur}
-                                                        value={formikLogin.values.email}
-                                                        isInvalid={!!formikLogin.errors.email}
+                                                        onChange={formikCred.handleChange}
+                                                        onBlur={formikCred.handleBlur}
+                                                        value={formikCred.values.email}
+                                                        isInvalid={!!formikCred.errors.email}
                                                     />
-                                                    {formikLogin.touched.email && formikLogin.errors.email ? (
-                                                        <Form.Control.Feedback>{formikLogin.errors.email}</Form.Control.Feedback>
+                                                    {formikCred.touched.email && formikCred.errors.email ? (
+                                                        <Form.Control.Feedback>{formikCred.errors.email}</Form.Control.Feedback>
                                                     ) : null}
                                                 </Form.Group>
                                                 <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -140,33 +244,35 @@ const Order = () => {
                                                         type="text"
                                                         placeholder="Enter order number"
                                                         name="order_number"
-                                                        onChange={formikLogin.handleChange}
-                                                        onBlur={formikLogin.handleBlur}
-                                                        value={formikLogin.values.order_number}
-                                                        isInvalid={!!formikLogin.errors.order_number}
+                                                        onChange={formikCred.handleChange}
+                                                        onBlur={formikCred.handleBlur}
+                                                        value={formikCred.values.order_number}
+                                                        isInvalid={!!formikCred.errors.order_number}
                                                     />
-                                                    {formikLogin.touched.order_number && formikLogin.errors.order_number ? (
-                                                        <Form.Control.Feedback>{formikLogin.errors.order_number}</Form.Control.Feedback>
+                                                    {formikCred.touched.order_number && formikCred.errors.order_number ? (
+                                                        <Form.Control.Feedback>{formikCred.errors.order_number}</Form.Control.Feedback>
                                                     ) : null}
                                                 </Form.Group>
 
                                                 <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting}>
-                                                        {isSubmitting ? "Please wait..." : "Login"}
+                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting || formikCred.values.email === "" || formikCred.values.order_number === ""}>
+                                                        {isSubmitting ? "Please wait..." : "Fetch Order"}
                                                     </Button>
                                                 </div>
                                             </Form>
-                                        )
-                                        }
+                                        </div>
                                     </div>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-          </Row>
-          
-      </>
-  )
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                </>
+            )}
+
+
+
+        </>
+    )
 }
 
 export default Order;

@@ -8,7 +8,7 @@ from app.validators.file import FileField
 
 
 class UpdateAttachmentSchema(Schema):
-    status = fields.String(required=True, validate=OneOf(["Pending", "Accepted", "Rejected"]))
+    status = fields.String(required=True, validate=OneOf(["accept", "revision", "reject"]))
 
 
 class UploadAttachmentSchema(Schema):

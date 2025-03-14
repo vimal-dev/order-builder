@@ -27,7 +27,7 @@ const OrderIndex = () => {
             setCursor(_get(response, "data.data.next_cursor", null));
             setHasMore(!!_get(response, "data.data.next_cursor", null));
         } catch (error) {
-            console.error("Error fetching orders", error);
+            // console.error("Error fetching orders", error);
         }
         setLoading(false);
     };
