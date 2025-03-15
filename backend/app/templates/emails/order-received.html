@@ -1,8 +1,62 @@
-{% extends 'emails/base.html' %}
-{% block content %}
-
-<p>
-    Thanks we have received your customisation request. WE will update you ince it's ready
-</p>
-
-{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Update - {{app_name}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h2 {
+            color: #333333;
+        }
+        p {
+            color: #555555;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+<h2>Hi {{customer_name}},</h2>
+<p>I'm Evelyn from <strong>Loode Jewelry</strong>, and I’ll be personally assisting you from production through to delivery.</p>
+<h3 style="color: red;">PLEASE READ THIS CAREFULLY</h3>
+<p>Your personalized jewelry will include a design card inside the package, showcasing your custom piece.</p>
+<p><strong>Due to logistical reasons, we’re unable to send this card by email before delivery.</strong></p>
+<p>As you may have guessed, our jewelry is crafted one-on-one as a custom product made to order.</p>
+<p>As each piece is individually crafted to order, our process takes a little longer, but this ensures you receive a high-quality, one-of-a-kind piece made just for you.</p>
+<p><strong>For this reason, our delivery time is a bit longer than usual.</strong></p>
+<h3>Production Timeline:</h3>
+<ul>
+    <li><strong>Design:</strong> 1-5 days</li>
+    <li><strong>Production:</strong> 5-9 days</li>
+    <li><strong>Packaging:</strong> 1 day</li>
+    <li><strong>Shipping:</strong> 6-9 days</li>
+</ul>
+<p>I’ll keep you updated in the next few days.</p>
+<p>If you have any questions, please remember that I am always here to help.</p>
+<p>Thank you for choosing us, I can’t wait for you to receive your custom piece! ❤️</p>
+<p><strong>Evelyn from {{app_name}}</strong></p>
+<div class="footer">
+    &copy; 2024 {{app_name}} | All rights reserved
+</div>
+</div>
+</body>
+</html>

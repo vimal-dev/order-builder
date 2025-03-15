@@ -3,8 +3,10 @@ import os
 
 class Config(object):
     DEBUG = False
+    APP_NAME = "Loode Jewelry"
     API_PREFIX = "/api/v1"
     ADMIN_EMAIL = 'root@localhost'
+    APP_URL = "http://localhost:3000"
 
     SECRET_KEY = '8f42a73054b1749f8f58848be5e6502c'
 

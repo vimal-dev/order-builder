@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import List
-from sqlalchemy import DateTime, ForeignKey, Integer, Text, event, String
+from typing import Any, Dict, List
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, Text, event, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database import db
 
@@ -13,6 +13,8 @@ class Order(db.Model):
     customer_name: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
     customer_email: Mapped[str] = mapped_column(String(190))
     order_items: Mapped[List["OrderItem"]] = relationship(back_populates="order")
+    mail_sent = mapped_column(Boolean, nullable=True, default=True)
+    status: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
     created = mapped_column(DateTime, nullable=False)
     updated = mapped_column(DateTime, nullable=False)
 
@@ -27,8 +29,12 @@ class OrderItem(db.Model):
     order: Mapped[Order] = relationship("Order", back_populates="order_items")
     quantity: Mapped[int] = mapped_column(Integer, default=1)
     custom_design: Mapped[str] = mapped_column(String(190), nullable=True ,default=None)
+    product_name: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     title: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     sku: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
+    status: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
+    # JSON field for storing flexible structured data
+    properties: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, nullable=True, default=[])
     attachments: Mapped[List["Attachment"]] = relationship(back_populates="order_item")
     created = mapped_column(DateTime, nullable=False)
     updated = mapped_column(DateTime, nullable=False)

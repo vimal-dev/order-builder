@@ -1,0 +1,79 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Updated Design Approval - {{app_name}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        h2 {
+            color: #333333;
+        }
+        p {
+            color: #555555;
+            line-height: 1.6;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 10px;
+            color: white;
+            background-color: #d48806;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Hi {{customer_name}},</h2>
+        <p>This is Evelyn from <strong>{{app_name}}</strong>.</p>
+        
+        <h3>Exciting Update! 🎉</h3>
+        <p>I am thrilled to share the updated version of your custom design with you! Your feedback is very important to us, and we’d love to know if you love this new version.</p>
+        
+        <h3>To approve your design, follow these simple steps:</h3>
+        <ol>
+            <li>Sign in at the link below</li>
+            <li>Accept the Terms & Conditions</li>
+            <li>Enter the email linked to your order: <strong>andre1@yahoo.com</strong></li>
+            <li>Enter your order number: <strong>#0001</strong></li>
+        </ol>
+        
+        <p><a href="{{url}}" class="button">Click here to view your order</a></p>
+        
+        <p>Can’t wait to hear what you think! 😍</p>
+        
+        <h3>Please confirm your design within 24 hours</h3>
+        <p>Make sure it meets your expectations before production begins. If we don’t receive your confirmation, the monogram will be finalized as shown.</p>
+        
+        <p>Thank you,</p>
+        
+        <p><strong>Evelyn | {{app_name}}</strong><br>Customer Support Team</p>
+        
+        <div class="footer">
+            &copy; 2024 {{app_name}} | All rights reserved
+        </div>
+    </div>
+</body>
+</html>

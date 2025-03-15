@@ -38,8 +38,10 @@ def handle(data: Dict) -> bool:
             'order_id': order.id,
             'quantity': item.get("quantity"),
             'custom_design': custom_design,
-            'title': item.get('title'),
+            'product_name': item.get('title'),
+            'title': item.get('variant_title'),
             'sku': item.get('sku'),
+            'properties': properties,
             "created": datetime.now(timezone.utc),
             "updated": datetime.now(timezone.utc)
         }
@@ -52,11 +54,13 @@ def handle(data: Dict) -> bool:
         stmt = stmt.on_duplicate_key_update(**{
             "quantity": stmt.inserted.quantity,
             "custom_design": stmt.inserted.custom_design,
+            "product_name": stmt.inserted.product_name,
             "title": stmt.inserted.title,
             "sku": stmt.inserted.sku,
+            "properties": properties
         })
         db.session.execute(stmt)
     db.session.commit()
-    if is_new and has_custom_design:
-        order_received([order.customer_email], data={"order_number": order.order_number})
+    # if is_new and has_custom_design:
+    #     order_received([order.customer_email], data={"order_number": order.order_number})
     return True

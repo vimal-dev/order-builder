@@ -1,9 +1,17 @@
+export interface IOrderItemProperties {
+    name: string;
+    value: any;
+}
+
 export interface IOrderItem {
     id: string;
     order_id: string;
+    product_name?: string;
     title?: string;
     sku: string;
     quantity?: string;
+    properties: IOrderItemProperties[];
+    status: string;
     custom_design?: string;
     created: string;
     updated: string;
@@ -15,6 +23,7 @@ export interface IOrder {
     order_number: string;
     customer_name?: string;
     customer_email: string;
+    status: string;
     order_items: IOrderItem[];
     created: string;
     updated: string;

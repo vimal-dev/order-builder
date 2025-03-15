@@ -17,7 +17,7 @@ from app.services.auth import token_required
 from app.services.storage import get_spaces_client
 from app.helpers.form import parse_nested_form_data
 from app.validators.file import get_extension
-from app.mail import send_customer_attachment_update
+from app.mail import send_customer_order_update, send_customer_order_revision
 
 
 router = Blueprint("orders", __name__, url_prefix="orders")
@@ -28,6 +28,7 @@ def serialize_order(order: Order):
         "order_number": order.order_number,
         "customer_name": order.customer_name,
         "customer_email": order.customer_email,
+        "status": order.status,
         "created": order.created.isoformat(),
         "updated": order.updated.isoformat()
     }
@@ -36,8 +37,11 @@ def serialize_order_items(item: OrderItem):
     return {
         "id": item.id,
         "title": item.title,
+        "product_name": item.product_name,
         "sku": item.sku,
+        "properties": item.properties,
         "quantity": item.quantity,
+        "status": item.status,
         "custom_design": item.custom_design,
         "created": item.created.isoformat(),
         "updated": item.updated.isoformat(),
@@ -202,7 +206,18 @@ def add_attachment(current_user: User, item_id):
                 stmt_upd = update(Attachment).values(status=Attachment.STATUS_REVISION_REQUESTED).where(Attachment.status == Attachment.STATUS_WAITING_FOR_APPROVAL, Attachment.order_item_id == item_id, Attachment.id != attachment_model.id)
                 db.session.execute(stmt_upd)
             db.session.commit()
-            send_customer_attachment_update([order_item.order.customer_email], data={})
+            app_url = current_app.config.get("APP_URL")
+            if app_url:
+                app_url = app_url.strip("/")
+            mail_data = {
+                "app_name": current_app.config.get("APP_NAME"),
+                "customer_name": order_item.order.customer_name,
+                "url": f"{app_url}/order-details"
+            }
+            if order_item.order.mail_sent:
+                send_customer_order_revision([order_item.order.customer_email], data=mail_data)
+            else:
+                send_customer_order_update([order_item.order.customer_email], data=mail_data)
             response["code"] = HTTPStatus.CREATED
         except Exception as e:
             raise ValidationError(f"Failed to upload image: {e}")

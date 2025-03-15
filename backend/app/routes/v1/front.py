@@ -15,15 +15,19 @@ def serialize_order(order: Order):
         "order_number": order.order_number,
         "customer_name": order.customer_name,
         "customer_email": order.customer_email,
+        "status": order.status,
         "updated": order.updated.isoformat()
     }
 
 def serialize_order_items(item: OrderItem):
     return {
         "id": item.id,
+        "product_name": item.product_name,
         "title": item.title,
         "sku": item.sku,
+        "properties": item.properties,
         "quantity": item.quantity,
+        "status": item.status,
         "custom_design": item.custom_design,
         "updated": item.updated.isoformat(),
     }

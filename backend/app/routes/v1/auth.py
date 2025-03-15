@@ -65,7 +65,7 @@ def login():
             totp = pyotp.TOTP(user.mfa_secret, interval=interval)
             otp = totp.now()
             if not debug:
-                send_login_otp(user.email, otp)
+                send_login_otp(user.email, {"otp": otp, "app_name": current_app.config.get("APP_NAME")})
             response["code"] = 200
             response["message"] = "Otp sent please check your email"
             if debug:

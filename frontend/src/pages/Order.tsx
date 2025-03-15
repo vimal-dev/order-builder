@@ -137,7 +137,11 @@ const Order = () => {
                                             <tbody>
                                                 {order?.order_items.map(item => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
-                                                        <td>{item?.title}<strong>{item.sku}</strong></td>
+                                                        <td>
+                                                        {item?.product_name}{item?.title? <><br />{item?.title}</>:''}<br />
+                                                        <span><strong>SKU: </strong>{item?.sku}</span><br />
+                                                        {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
+                                                        </td>
                                                         <td>{item?.quantity}</td>
                                                         <td>{item?.custom_design || "N/A"}</td>
                                                     </tr>
