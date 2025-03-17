@@ -1,6 +1,5 @@
 import json
 
-from celery import Celery, Task as CeleryTask
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -8,20 +7,7 @@ from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 
 from app import config
 from app.database import db
-# from app.celery import celery
-
-
-# def init_celery(app: Flask) -> None:
-#     """Bind Celery instance to Flask app."""
-#     celery.conf.update(app.config)
-
-#     class ContextTask(celery.Task):
-#         """Ensure Celery tasks run inside Flask app context."""
-#         def __call__(self, *args, **kwargs):
-#             with app.app_context():
-#                 return super().__call__(*args, **kwargs)
-
-#     celery.Task = ContextTask
+from app.services.celery import celery_init_app
 
 def create_app() -> Flask:
     # create and configure the app
@@ -41,6 +27,18 @@ def create_app() -> Flask:
     # initialize the app with the extension
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    app.config.from_mapping(
+        CELERY=dict(
+            broker_url="redis://cache:6379/0",
+            result_backend="redis://cache:6379/0",
+            broker_connection_retry_on_startup=True,
+            task_create_missing_queues=True,
+            task_ignore_result=True,
+        ),
+    )
+
+    celery_init_app(app)
 
     from app.routes import router
     app.register_blueprint(router, url_prefix=api_prefix)

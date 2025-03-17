@@ -60,6 +60,9 @@ class Config(object):
 
     RECORDS_LIMIT = 25
 
+    CELERY_BROKER_URL = 'redis://localhost:16379/0'
+    CELERY_RESULT_BACKEND= 'redis://localhost:16379/0'
+
     # @property
     # def SHOPIFY_API_SCOPES_LIST(self):
     #     return [str(x).strip() for x in self.SHOPIFY_API_SCOPES.split(',')] if self.SHOPIFY_API_SCOPES else []
