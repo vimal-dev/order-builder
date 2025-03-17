@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { get as _get } from "lodash"
 
 import config from "../../config";
-import { Link } from "react-router-dom";
 import useFilter from "../../hooks/useFilter";
 import { FilterableFieldsGroupInterface } from "../../hooks/useFilter";
 import Filterable from "../../components/Filterable";
@@ -13,7 +12,6 @@ import { useAuthenticatedAxios } from "../../hooks/useAxios";
 
 
 const ExportIndex = () => {
-    const [showFilterable, setShowFilterable] = useState(false);
     const [downloading, setDownloading] = useState(false);
     const axios = useAuthenticatedAxios();
 
@@ -41,10 +39,6 @@ const ExportIndex = () => {
         endpoint: "/exports",
         queryParams: []
     });
-
-    const toggleFilters = () => {
-        setShowFilterable(!showFilterable)
-    };
 
     useEffect(() => {
         fetchRecords();
@@ -91,7 +85,7 @@ const ExportIndex = () => {
                             <Filterable
                                 loading={loading}
                                 canExport={true}
-                                showFilterable={showFilterable}
+                                showFilterable={false}
                                 selectedFilters={selectedFilters}
                                 sortColumn={sortColumn}
                                 removeSortColumn={removeSortColumn}

@@ -8,6 +8,8 @@ class Config(object):
     ADMIN_EMAIL = 'root@localhost'
     APP_URL = "http://localhost:3000"
 
+    #APPLICATION_ROOT = "/"
+
     SECRET_KEY = '8f42a73054b1749f8f58848be5e6502c'
 
     JWT_PRIVATE_KEY = ''
