@@ -27,6 +27,9 @@ function Header() {
                         <NavItem>
                             <Nav.Link as={Link} to="/orders">Orders</Nav.Link>
                         </NavItem>
+                        <NavItem>
+                            <Nav.Link as={Link} to="/exports">Exports</Nav.Link>
+                        </NavItem>
                     </Nav>
                 </Navbar.Collapse>
                 <Navbar.Collapse className="justify-content-end">

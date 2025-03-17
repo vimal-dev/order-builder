@@ -2,10 +2,10 @@
 
 
 from datetime import datetime
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, json, jsonify, request, current_app
 from http import HTTPStatus
 from marshmallow import ValidationError
-from sqlalchemy import asc, desc, select, update
+from sqlalchemy import and_, asc, desc, select, update
 import uuid
 from werkzeug.utils import secure_filename
 
@@ -18,6 +18,8 @@ from app.services.storage import get_spaces_client
 from app.helpers.form import parse_nested_form_data
 from app.validators.file import get_extension
 from app.mail import send_customer_order_update, send_customer_order_revision
+from app.helpers.filters import build_filters
+from app.helpers.common import decode_next_token, encode_next_token
 
 
 router = Blueprint("orders", __name__, url_prefix="orders")
@@ -72,47 +74,49 @@ def index(current_user: User):
         'message': 'Working!',
         "data": {
             "items": None,
-            "next_cursor": None
+            "next_token": None,
+            "has_next": False
         },
         "errors": {},
     }
+
+    filters = json.loads(request.args.get("f", "[]"))
+    # sorting = json.loads(request.args.get("s", "[]"))
+    filter_column_types = {
+        "created": "datetime"
+    }
+    conditions = build_filters(filters, filter_column_types)
+
     limit = request.args.get("limit", current_app.config.get("RECORDS_LIMIT"), type=int)
-    cursor = request.args.get("cursor", None, type=str)
-    order_number = request.args.get("order_number", None, type=str)
-    customer_email = request.args.get("customer_email", None, type=str)
-    created_after = request.args.get("created_after", None, type=str)
-    created_before = request.args.get("created_before", None, type=str)
+    next_token = request.args.get("next_token", None, type=str)
+
+    options = {}
+    if next_token:
+        options = decode_next_token(next_token)
     descending = request.args.get("descending", "true").lower() == "true"
 
     query = select(Order)
 
-    # Apply filters
-    if order_number:
-        query = query.where(Order.order_number == order_number)
-    if customer_email:
-        query = query.where(Order.customer_email == customer_email)
-    if created_after:
-        query = query.where(Order.created >= datetime.fromisoformat(created_after))
-    if created_before:
-        query = query.where(Order.created <= datetime.fromisoformat(created_before))
+    query = query.filter(and_(*conditions))
 
     # Apply cursor-based pagination
-    if cursor:
+    if "token" in options:
         if descending:
-            query = query.where(Order.created < datetime.fromisoformat(cursor))
+            query = query.where(Order.created < datetime.fromisoformat(options["token"]))
         else:
-            query = query.where(Order.created > datetime.fromisoformat(cursor))
+            query = query.where(Order.created > datetime.fromisoformat(options["token"]))
 
     # Order and limit results
     order_by_column = desc(Order.created) if descending else asc(Order.created)
     query = query.order_by(order_by_column).limit(limit)
-
     results = db.session.execute(query).scalars().all()
-    
-    # Prepare next cursor
-    next_cursor = results[-1].created.isoformat() if results else None
+    has_next = len(results) >= limit
     response["data"]["items"] =  [serialize_order(order) for order in results]
-    response["data"]["next_cursor"] = next_cursor
+    response["data"]["has_next"] = has_next
+    if has_next:
+        next_cursor = results[-1].created.isoformat() if results else None
+        options["token"] = next_cursor
+        response["data"]["next_token"] = encode_next_token(options)
     return jsonify(response), response["code"]
 
 

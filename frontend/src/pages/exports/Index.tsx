@@ -8,39 +8,16 @@ import { Link } from "react-router-dom";
 import useFilter from "../../hooks/useFilter";
 import { FilterableFieldsGroupInterface } from "../../hooks/useFilter";
 import Filterable from "../../components/Filterable";
-import { IOrder } from "../../types/order";
+import { IExport } from "../../types/export";
+import { useAuthenticatedAxios } from "../../hooks/useAxios";
 
 
-const OrderIndex = () => {
+const ExportIndex = () => {
     const [showFilterable, setShowFilterable] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+    const axios = useAuthenticatedAxios();
 
-    const filterableFields: Array<FilterableFieldsGroupInterface> = [
-        {
-            title: "Order",
-            fields: [
-                {
-                    label: "Customer Email",
-                    value: "customer_email",
-                    type: "string"
-                },
-                {
-                    label: "Order Number",
-                    value: "order_number",
-                    type: "string"
-                },
-                {
-                    label: "Status",
-                    value: "status",
-                    type: "string"
-                },
-                {
-                    label: "Created",
-                    value: "created",
-                    type: "datetime"
-                }
-            ]
-        }
-    ];
+    const filterableFields: Array<FilterableFieldsGroupInterface> = [];
 
     const {
         loading,
@@ -60,10 +37,8 @@ const OrderIndex = () => {
         onFilterOperatorSelectHandler,
         onFilterValueOneChangeHandler,
         onFilterValueTwoChangeHandler
-    } = useFilter<IOrder>({
-        endpoint: "/orders",
-        exportIdentifier: "orders",
-        exportEndpoint: "/exports/create",
+    } = useFilter<IExport>({
+        endpoint: "/exports",
         queryParams: []
     });
 
@@ -82,20 +57,37 @@ const OrderIndex = () => {
         }
     }
 
+    const handleDownload = async (id: number) => {
+        setDownloading(true)
+        try {
+          const response = await axios.get(`/exports/download/${id}`, {
+            responseType: "blob", // Important for binary data
+          });
+      
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "exported-data.xlsx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("Download failed:", error);
+        }
+        setDownloading(false)
+      };
+
     return (
         <>
             <Helmet>
-                <title>${config.title} - Orders</title>
+                <title>${config.title} - Exports</title>
             </Helmet>
             <Row>
                 <Col>
                     <Card>
                         <Card.Body>
-                            <Card.Title>Orders</Card.Title>
-                            <div className="page-actions">
-                                <Button className="float-end btn btn-secondary btn-sm" onClick={toggleFilters}>Filters</Button>
-                                <div className="clearfix"></div>
-                            </div>
+                            <Card.Title>Exports</Card.Title>
                             <Filterable
                                 loading={loading}
                                 canExport={true}
@@ -120,19 +112,17 @@ const OrderIndex = () => {
                             <Table striped bordered hover>
                                 <thead>
                                     <tr>
-                                        <th>Order Number</th>
-                                        <th>Customer</th>
-                                        <th>Customer Email</th>
+                                        <th>Export Created</th>
+                                        <th>Status</th>
                                         <th>#</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {records.map(order => (
-                                        <tr key={order.id}>
-                                            <td>{order.order_number}</td>
-                                            <td>{order.customer_name || "N/A"}</td>
-                                            <td>{order.customer_email}</td>
-                                            <td><Link to={`/orders/${order.id}`}>View</Link></td>
+                                    {records.map(exp => (
+                                        <tr key={exp.id}>
+                                            <td>{new Date(exp.updated).toLocaleString()}</td>
+                                            <td>{exp.status}</td>
+                                            <td><Button disabled={exp.status != "Completed" || downloading} onClick={() => handleDownload(exp.id)} size="sm" >Download</Button></td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -151,4 +141,4 @@ const OrderIndex = () => {
     );
 };
 
-export default OrderIndex;
+export default ExportIndex;
