@@ -30,8 +30,8 @@ def create_app() -> Flask:
 
     app.config.from_mapping(
         CELERY=dict(
-            broker_url="redis://cache:6379/0",
-            result_backend="redis://cache:6379/0",
+            broker_url=app.config.get("CELERY_BROKER_URL"),
+            result_backend=app.config.get("CELERY_RESULT_BACKEND"),
             broker_connection_retry_on_startup=True,
             task_create_missing_queues=True,
             task_ignore_result=True,
