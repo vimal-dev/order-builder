@@ -214,8 +214,10 @@ def add_attachment(current_user: User, item_id):
             if app_url:
                 app_url = app_url.strip("/")
             mail_data = {
+                "order_number": order_item.order.order_number,
                 "app_name": current_app.config.get("APP_NAME"),
                 "customer_name": order_item.order.customer_name,
+                "customer_email": order_item.order.customer_email,
                 "url": f"{app_url}/order-details"
             }
             if order_item.order.mail_sent:
