@@ -1,5 +1,6 @@
 import json
 
+from celery import Celery, Task as CeleryTask
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -7,7 +8,20 @@ from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 
 from app import config
 from app.database import db
+# from app.celery import celery
 
+
+# def init_celery(app: Flask) -> None:
+#     """Bind Celery instance to Flask app."""
+#     celery.conf.update(app.config)
+
+#     class ContextTask(celery.Task):
+#         """Ensure Celery tasks run inside Flask app context."""
+#         def __call__(self, *args, **kwargs):
+#             with app.app_context():
+#                 return super().__call__(*args, **kwargs)
+
+#     celery.Task = ContextTask
 
 def create_app() -> Flask:
     # create and configure the app
