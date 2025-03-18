@@ -6,6 +6,7 @@ from app.database import db
 from app.models.shopify.order import Attachment, Order, OrderItem
 from app.validators.file import get_extension
 from app.schemas.front import OrderDetailsSchema, UpdateAttachmentSchema
+from app.tasks import order_item_updated
 
 router = Blueprint("front", __name__, url_prefix="o")
 
@@ -88,6 +89,7 @@ def update_attachment(item_id, attachment_id):
     data = request.get_json()
     try:
         data = UpdateAttachmentSchema().load(data)
+        order_item = db.session.query(OrderItem).filter_by(id=item_id).first()
         attachment = db.session.query(Attachment).filter_by(id=attachment_id, order_item_id=item_id).first()
         if attachment is None:
             response["code"] = 404
@@ -95,6 +97,7 @@ def update_attachment(item_id, attachment_id):
 
         match(data.get("status")):
             case "Accept":
+                order_item.status = OrderItem.STATUS_DESIGN_APPROVED
                 attachment.status = Attachment.STATUS_DESIGN_APPROVED
             case "Revision":
                 attachment.status = Attachment.STATUS_REVISION_REQUESTED
@@ -102,6 +105,7 @@ def update_attachment(item_id, attachment_id):
                 current_app.logger.info("Invalid status requested")
         attachment.comment = data.get("comment")
         db.session.commit()
+        order_item_updated.delay(item_id)
     except ValidationError as err:
         response["code"] = 422
         response["success"] = False

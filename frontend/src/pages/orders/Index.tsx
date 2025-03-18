@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Spinner, Row, Col, Card } from "react-bootstrap";
+import { Table, Button, Spinner, Row, Col, Card, Badge } from "react-bootstrap";
 import { Helmet } from "react-helmet-async";
 import { get as _get } from "lodash"
 
@@ -9,6 +9,7 @@ import useFilter from "../../hooks/useFilter";
 import { FilterableFieldsGroupInterface } from "../../hooks/useFilter";
 import Filterable from "../../components/Filterable";
 import { IOrder } from "../../types/order";
+import { OrderStatus } from "../../enums/order";
 
 
 const OrderIndex = () => {
@@ -123,6 +124,7 @@ const OrderIndex = () => {
                                         <th>Order Number</th>
                                         <th>Customer</th>
                                         <th>Customer Email</th>
+                                        <th>Status & Last Updated</th>
                                         <th>#</th>
                                     </tr>
                                 </thead>
@@ -132,6 +134,7 @@ const OrderIndex = () => {
                                             <td>{order.order_number}</td>
                                             <td>{order.customer_name || "N/A"}</td>
                                             <td>{order.customer_email}</td>
+                                            <td><Badge className="rounded-0" bg={order?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
                                             <td><Link to={`/orders/${order.id}`}>View</Link></td>
                                         </tr>
                                     ))}

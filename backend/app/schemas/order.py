@@ -19,3 +19,20 @@ class UploadAttachmentSchema(Schema):
             "allowed_extensions": ["pdf", "jpeg", "jpg", "png", "svg"]
         }
     )
+
+
+class UploadPdfOrGiftSchema(Schema):
+    pdf_file = FileField(
+        required=True, 
+        allow_none=True, 
+        metadata={
+            "allowed_extensions": ["pdf"]
+        }
+    )
+    gift_file = FileField(
+        required=True, 
+        allow_none=True, 
+        metadata={
+            "allowed_extensions": ["jpeg", "jpg", "png", "svg"]
+        }
+    )

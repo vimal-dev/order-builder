@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename
 from app.database import db
 from app.models.shopify.order import Attachment, Order, OrderItem
 from app.models.user import User
-from app.schemas.order import UpdateAttachmentSchema, UploadAttachmentSchema
+from app.schemas.order import UpdateAttachmentSchema, UploadAttachmentSchema, UploadPdfOrGiftSchema
 from app.services.auth import token_required
 from app.services.storage import get_spaces_client
 from app.helpers.form import parse_nested_form_data
@@ -20,6 +20,7 @@ from app.validators.file import get_extension
 from app.mail import send_customer_order_update, send_customer_order_revision
 from app.helpers.filters import build_filters
 from app.helpers.common import decode_next_token, encode_next_token
+from app.tasks import order_item_updated
 
 
 router = Blueprint("orders", __name__, url_prefix="orders")
@@ -36,6 +37,14 @@ def serialize_order(order: Order):
     }
 
 def serialize_order_items(item: OrderItem):
+    bucket_name = current_app.config.get("AWS_S3_BUCKET")
+    endpoint = current_app.config.get("AWS_ENDPOINT_URL")
+    pdf_url = None
+    gift_url = None
+    if item.pdf_file:
+        pdf_url = f"{endpoint}/{bucket_name}/{item.pdf_file}"
+    if item.gift_image:
+        gift_url = f"{endpoint}/{bucket_name}/{item.gift_image}"
     return {
         "id": item.id,
         "title": item.title,
@@ -45,6 +54,8 @@ def serialize_order_items(item: OrderItem):
         "quantity": item.quantity,
         "status": item.status,
         "custom_design": item.custom_design,
+        "pdf_url": pdf_url,
+        "gift_url": gift_url,
         "created": item.created.isoformat(),
         "updated": item.updated.isoformat(),
     }
@@ -224,6 +235,64 @@ def add_attachment(current_user: User, item_id):
                 send_customer_order_revision([order_item.order.customer_email], data=mail_data)
             else:
                 send_customer_order_update([order_item.order.customer_email], data=mail_data)
+            response["code"] = HTTPStatus.CREATED
+        except Exception as e:
+            raise ValidationError(f"Failed to upload image: {e}")
+    except ValidationError as err:
+        response["code"] = 422
+        response["success"] = False
+        response["errors"] = err.messages
+        response["message"] = "Validation Error"
+
+    
+    return jsonify(response), response["code"]
+
+
+@router.route('/dispatch/<item_id>', methods=['POST', 'PUT'])
+@token_required
+def add_pdf_and_gift_image(current_user: User, item_id):
+    response = {
+        "code": 200,
+        'message': 'Working!',
+        "data": None,
+        "errors": {},
+    }
+
+    data = parse_nested_form_data(request)
+    try:
+        data = UploadPdfOrGiftSchema().load(data)
+        pdf_file = data.get("pdf_file")
+        gift_file = data.get("gift_file")
+        pdf_filename = f"{uuid.uuid4().hex}_{secure_filename(pdf_file.filename)}"
+        gift_filename = f"{uuid.uuid4().hex}_{secure_filename(gift_file.filename)}"
+        spaces_client = get_spaces_client()
+        bucket_name = current_app.config.get("AWS_S3_BUCKET")
+        endpoint = current_app.config.get("AWS_ENDPOINT_URL")
+        try:
+            order_item = db.session.query(OrderItem).filter_by(id=item_id).first()
+            spaces_client.upload_fileobj(
+                pdf_file,
+                bucket_name,
+                pdf_filename,
+                ExtraArgs={
+                    "ACL": "public-read",
+                    "ContentType": pdf_file.content_type
+                }
+            )
+            spaces_client.upload_fileobj(
+                gift_file,
+                bucket_name,
+                gift_filename,
+                ExtraArgs={
+                    "ACL": "public-read",
+                    "ContentType": gift_file.content_type
+                }
+            )
+            order_item.pdf_file = pdf_filename
+            order_item.gift_image = gift_filename
+            order_item.status = OrderItem.STATUS_READY_FOR_PRODUCTION
+            db.session.commit()
+            order_item_updated.delay(item_id)
             response["code"] = HTTPStatus.CREATED
         except Exception as e:
             raise ValidationError(f"Failed to upload image: {e}")

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import Dict
 
+from flask import current_app
 from sqlalchemy.dialects.mysql import insert
 
 from app.database import db
@@ -23,7 +24,13 @@ def handle(data: Dict) -> bool:
         order.customer_name = customer_name
         order.customer_email = customer.get("email")
     else:
-        order = Order(id=order_id, order_number=order_number, customer_name=customer_name, customer_email=customer.get("email"))
+        order = Order(
+            id=order_id, 
+            order_number=order_number, 
+            customer_name=customer_name, 
+            customer_email=customer.get("email"),
+            status=Order.STATUS_PROCESSING,
+        )
         db.session.add(order)
         db.session.flush()
         is_new = True
@@ -33,6 +40,9 @@ def handle(data: Dict) -> bool:
         properties = item.get("properties", [])
         custom_design = [p.get("value") for p in properties if p["name"] > "Custom_design"]
         custom_design = custom_design[0] if len(custom_design) > 0 else None
+        isProduction = current_app.config.get("DEBUG")
+        if isProduction and custom_design is None:
+            continue
         raw_data = {
             'id': item.get('id'),
             'order_id': order.id,
@@ -42,6 +52,7 @@ def handle(data: Dict) -> bool:
             'title': item.get('variant_title'),
             'sku': item.get('sku'),
             'properties': properties,
+            'status': OrderItem.STATUS_PROCESSING,
             "created": datetime.now(timezone.utc),
             "updated": datetime.now(timezone.utc)
         }

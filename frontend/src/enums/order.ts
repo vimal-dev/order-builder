@@ -5,3 +5,9 @@ export enum Status {
     READY_FOR_PRODUCTION = "Ready For Production",
     REJECTED = "Rejected"
 }
+
+export enum OrderStatus {
+    STATUS_PROCESSING = "Processing",
+    STATUS_DESIGN_APPROVED = "Design Approved",
+    STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+}
