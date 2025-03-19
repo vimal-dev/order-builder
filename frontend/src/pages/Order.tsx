@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import config from "../config";
-import { Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import { Badge, Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import * as Yup from 'yup';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
@@ -9,6 +9,7 @@ import { get as _get } from "lodash";
 import { useAxios } from '../hooks/useAxios';
 import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
 import Attachment from '../components/front/Attachment';
+import { OrderStatus } from '../enums/order';
 
 const CredentialsSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -131,7 +132,7 @@ const Order = () => {
                                                 <tr>
                                                     <th>Order Item</th>
                                                     <th>Quantity</th>
-                                                    <th>Custom Design</th>
+                                                    <th>Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -143,7 +144,9 @@ const Order = () => {
                                                         {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                                         </td>
                                                         <td>{item?.quantity}</td>
-                                                        <td>{item?.custom_design || "N/A"}</td>
+                                                        <td>
+                                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                                        </td>
                                                     </tr>
                                                 ))}
 

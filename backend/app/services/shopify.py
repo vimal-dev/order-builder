@@ -80,7 +80,7 @@ def get_customers(payload: Dict):
 
 
 @with_shopify
-def get_customer(id: str):
+def get_product(id: str):
     gql_path = current_app.config.get("GRAPHQL_FOLDER")
     document = Path(f"{gql_path}/queries.graphql").read_text()
 
@@ -88,10 +88,10 @@ def get_customer(id: str):
     raw_response = shopify.GraphQL().execute(
         query=document,
         variables={"id": id},
-        operation_name="getCustomer",
+        operation_name="getProduct",
     )
     parsed_response = json.loads(raw_response)
-    return parsed_response["data"]["customer"], None
+    return parsed_response["data"]["product"], None
 
 
 @with_shopify

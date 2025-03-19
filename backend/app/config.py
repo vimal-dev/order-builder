@@ -65,6 +65,8 @@ class Config(object):
     CELERY_BROKER_URL = 'redis://localhost:16379/0'
     CELERY_RESULT_BACKEND= 'redis://localhost:16379/0'
 
+    GRAPHQL_FOLDER = os.path.join(os.path.realpath(os.path.dirname(__file__)), "graphql")
+
     # @property
     # def SHOPIFY_API_SCOPES_LIST(self):
     #     return [str(x).strip() for x in self.SHOPIFY_API_SCOPES.split(',')] if self.SHOPIFY_API_SCOPES else []

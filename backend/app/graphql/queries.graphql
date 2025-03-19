@@ -1,0 +1,52 @@
+query getProduct($id: ID!) {
+  product(id: $id) {
+    status
+    variants(first: 100){
+      edges{
+        node{
+          id
+          title
+          selectedOptions{
+            name
+            value
+          }
+        }
+      }
+    }
+    category {
+      name
+      id
+    }
+    forGender: metafield(namespace: "custom", key: "upsell_product_title") {
+      value
+    }
+  }
+}
+
+query getProducts($ids: [ID!]!) {
+  nodes(ids: $ids) {
+    ... on Product {
+      id
+      status
+      variants(first: 100) {
+        edges {
+          node {
+            id
+            title
+            selectedOptions {
+              name
+              value
+            }
+          }
+        }
+      }
+      category {
+        name
+        id
+      }
+      forGender: metafield(namespace: "custom", key: "upsell_product_title") {
+        value
+      }
+    }
+  }
+}

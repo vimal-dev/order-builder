@@ -12,5 +12,5 @@ def check():
         "data": None,
         "errors": {},
     }
-    export_orders.delay(2)
+    #export_orders.delay(3)
     return jsonify(response), response["code"]

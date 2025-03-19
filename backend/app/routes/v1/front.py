@@ -21,14 +21,25 @@ def serialize_order(order: Order):
     }
 
 def serialize_order_items(item: OrderItem):
+    # bucket_name = current_app.config.get("AWS_S3_BUCKET")
+    # endpoint = current_app.config.get("AWS_ENDPOINT_URL")
+    # pdf_url = None
+    # gift_url = None
+    # if item.pdf_file:
+    #     pdf_url = f"{endpoint}/{bucket_name}/{item.pdf_file}"
+    # if item.gift_image:
+    #     gift_url = f"{endpoint}/{bucket_name}/{item.gift_image}"
     return {
         "id": item.id,
-        "product_name": item.product_name,
         "title": item.title,
+        "product_name": item.product_name,
         "sku": item.sku,
         "properties": item.properties,
         "quantity": item.quantity,
         "status": item.status,
+        "custom_design": item.custom_design,
+        # "pdf_url": pdf_url,
+        # "gift_url": gift_url,
         "custom_design": item.custom_design,
         "updated": item.updated.isoformat(),
     }

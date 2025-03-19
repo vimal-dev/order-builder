@@ -9,7 +9,7 @@ import * as Yup from 'yup';
 import * as coreAxios from "axios";
 
 import config from "../../config";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Attachment from "../../components/Attachment";
 import { toast } from "react-toastify";
 import { OrderStatus } from "../../enums/order";
@@ -175,7 +175,16 @@ const OrderView = () => {
                                         {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                     </td>
                                     <td>{item?.quantity}</td>
-                                    <td><Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge></td>
+                                    <td>
+                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (<div className="m-3"></div>)}
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (
+                                            <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF</Link>
+                                        )}
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.gift_url) && (
+                                            <Link to={item?.gift_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download Gift Image</Link>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
 

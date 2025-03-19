@@ -48,6 +48,7 @@ class OrderItem(db.Model):
     gift_image: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     # JSON field for storing flexible structured data
     properties: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, nullable=True, default=[])
+    others: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True, default={})
     attachments: Mapped[List["Attachment"]] = relationship(back_populates="order_item")
     created = mapped_column(DateTime, nullable=False)
     updated = mapped_column(DateTime, nullable=False)

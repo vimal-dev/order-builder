@@ -127,22 +127,31 @@ def get_orders(filters: List = [], cursor = None) ->  tuple[List, str | None]:
 
 def serialize_order(order: Order) -> List[dict]:
     items = []
+    bucket_name = flask_app.config.get("AWS_S3_BUCKET")
+    endpoint = flask_app.config.get("AWS_ENDPOINT_URL")
+    
     for oi in order.order_items:
         if oi.custom_design is not None:
+            pdf_url = ""
+            gift_url = ""
+            if oi.pdf_file:
+                pdf_url = f"{endpoint}/{bucket_name}/{oi.pdf_file}"
+            if oi.gift_image:
+                gift_url = f"{endpoint}/{bucket_name}/{oi.gift_image}"
             row = {
                 "Order No.": order.order_number,
                 "Name": oi.custom_design,
                 "Status": oi.status,
                 "Quantity": oi.quantity,
-                "Material": "",
-                "Chain Length": "",
-                "Birthstone Y/N": "",
+                "Material": oi.others["material"],
+                "Chain Length": oi.others["chain_length"],
+                "Birthstone Y/N": oi.others["birth_stone"],
                 "Packaging Y/N": "",
-                "Chain Type": "",
+                "Chain Type": oi.others["for"],
                 "Version": "",
                 "Style": "",
-                "PDF Design Link": "",
-                "Thank You Card Link": "",
+                "PDF Design Link": pdf_url,
+                "Thank You Card Link": gift_url,
                 "Colonna 1": "",
                 "Start Produce Date": "",
                 "Shipped": ""

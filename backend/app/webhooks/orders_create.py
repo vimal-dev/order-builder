@@ -37,9 +37,27 @@ def handle(data: Dict) -> bool:
     i = 0
     order_items = []
     for item in items:
+
         properties = item.get("properties", [])
         custom_design = [p.get("value") for p in properties if p["name"] > "Custom_design"]
         custom_design = custom_design[0] if len(custom_design) > 0 else None
+
+        birth_stone = [p.get("value") for p in properties if p["name"] > "Extra charm"]
+        birth_stone = birth_stone[0] if len(birth_stone) > 0 else None
+
+        variant_title = item.get("variant_title")
+        material = chain_length = ""
+        if variant_title:
+            splitted_title = variant_title.split("/")
+            if len(splitted_title) == 2:
+                material, chain_length = splitted_title
+        others = {
+            "for": "Man" if item.get("product_id", None) == "8339432734870" else "Woman",
+            "material": material,
+            "chain_length": chain_length,
+            "birth_stone": birth_stone
+        }
+        
         isProduction = current_app.config.get("DEBUG")
         if isProduction and custom_design is None:
             continue
@@ -52,6 +70,7 @@ def handle(data: Dict) -> bool:
             'title': item.get('variant_title'),
             'sku': item.get('sku'),
             'properties': properties,
+            'others': others,
             'status': OrderItem.STATUS_PROCESSING,
             "created": datetime.now(timezone.utc),
             "updated": datetime.now(timezone.utc)
@@ -68,7 +87,8 @@ def handle(data: Dict) -> bool:
             "product_name": stmt.inserted.product_name,
             "title": stmt.inserted.title,
             "sku": stmt.inserted.sku,
-            "properties": properties
+            "properties": properties,
+            'others': others
         })
         db.session.execute(stmt)
     db.session.commit()
