@@ -13,6 +13,7 @@ import OrderIndex from "./pages/orders/Index";
 import OrderView from "./pages/orders/View";
 import { ToastContainer } from "react-toastify";
 import Order from "./pages/Order";
+import ExportIndex from "./pages/exports/Index";
 
 function App() {
   useEffect(() => {
@@ -36,6 +37,7 @@ function App() {
                 <Route path="" element={<Profile/>}></Route>
                 <Route path="change-password" element={<ChangePassword/>}></Route>
             </Route> */}
+            <Route path="/exports" element={<ExportIndex />}></Route>
             <Route path="/orders">
                 <Route path="" element={<OrderIndex/>}></Route>
                 <Route path=":id" element={<OrderView/>}></Route>

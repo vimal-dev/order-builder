@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Row, Col, Card, CardText, Button, Form } from "react-bootstrap";
+import { Table, Row, Col, Card, CardText, Button, Form, Badge } from "react-bootstrap";
 import { useAuthenticatedAxios } from "../../hooks/useAxios";
 import { IAttachment, IOrder, IOrderItem } from "../../types/order";
 import { Helmet } from "react-helmet-async";
@@ -9,9 +9,10 @@ import * as Yup from 'yup';
 import * as coreAxios from "axios";
 
 import config from "../../config";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Attachment from "../../components/Attachment";
 import { toast } from "react-toastify";
+import { OrderStatus } from "../../enums/order";
 
 // interface IUpdateStatus{
 //     id: number | string | null;
@@ -23,6 +24,11 @@ const UploadSchema = Yup.object().shape({
     attached_file: Yup.mixed().required('File is required'),
 });
 
+
+const DispatchUploadSchema = Yup.object().shape({
+    pdf_file: Yup.mixed().required('File is required'),
+    gift_file: Yup.mixed().required('File is required'),
+});
 
 const OrderView = () => {
     const axios = useAuthenticatedAxios();
@@ -38,35 +44,69 @@ const OrderView = () => {
     console.log(loadingAttachments)
 
     const formikUpload = useFormik({
-            initialValues: {
-                attached_file: null
-            },
-            validationSchema: UploadSchema,
-            onSubmit: async (values, { setErrors, resetForm }) => {
-                setIsSubmitting(true);
-                try {
-                    if (values.attached_file) {
-                        const formData = new FormData();
-                        formData.append("attached_file", values.attached_file);
-                        await axios.post(`/orders/attachment/add/${selected_order_item?.id}`, formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data'
-                            }
-                        });
-                        resetForm();
-                        setRefresh(refresh + 1);
-                        toast("File uploaded successfully");
-                    }
-                } catch (error: unknown) {
-                    if (coreAxios.isAxiosError(error)) {
-                        if (error.response && error.response.status === 422) {
-                            setErrors(_get(error, "response.data.errors", {}));
+        initialValues: {
+            attached_file: null
+        },
+        validationSchema: UploadSchema,
+        onSubmit: async (values, { setErrors, resetForm }) => {
+            setIsSubmitting(true);
+            try {
+                if (values.attached_file) {
+                    const formData = new FormData();
+                    formData.append("attached_file", values.attached_file);
+                    await axios.post(`/orders/attachment/add/${selected_order_item?.id}`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
                         }
+                    });
+                    resetForm();
+                    setRefresh(refresh + 1);
+                    toast("File uploaded successfully");
+                }
+            } catch (error: unknown) {
+                if (coreAxios.isAxiosError(error)) {
+                    if (error.response && error.response.status === 422) {
+                        setErrors(_get(error, "response.data.errors", {}));
                     }
                 }
-                setIsSubmitting(false);
-            },
-        });
+            }
+            setIsSubmitting(false);
+        },
+    });
+
+    const formikDispatch = useFormik({
+        initialValues: {
+            pdf_file: null,
+            gift_file: null
+        },
+        validationSchema: DispatchUploadSchema,
+        onSubmit: async (values, { setErrors, resetForm }) => {
+            setIsSubmitting(true);
+            try {
+                const formData = new FormData();
+                if (values.pdf_file) {
+                    formData.append("pdf_file", values.pdf_file);
+                }
+                if (values.gift_file) {
+                    formData.append("gift_file", values.gift_file);
+                }  
+                await axios.post(`/orders/dispatch/${selected_order_item?.id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                resetForm();
+                toast("File uploaded successfully");
+            } catch (error: unknown) {
+                if (coreAxios.isAxiosError(error)) {
+                    if (error.response && error.response.status === 422) {
+                        setErrors(_get(error, "response.data.errors", {}));
+                    }
+                }
+            }
+            setIsSubmitting(false);
+        },
+    });
 
     const fetchOrder = async (nextCursor = null) => {
         console.log("Called");
@@ -76,6 +116,10 @@ const OrderView = () => {
             if (nextCursor) params.cursor = nextCursor;
             const response = await axios.get(`/orders/${id}`, { params });
             setOrder(_get(response, "data.data", null));
+            const order_items = _get(response, "data.data.order_items", []);
+            if(order_items && order_items?.length) {
+                setSelectedOrderItem(order_items[0])
+            }
         } catch (error) {
             console.error("Error fetching orders", error);
         }
@@ -123,19 +167,28 @@ const OrderView = () => {
                             <tr>
                                 <th>Order Item</th>
                                 <th>Quantity</th>
-                                <th>Custom Design</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
                             {order?.order_items.map(item => (
                                 <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                     <td>
-                                        {item?.product_name}{item?.title? <><br />{item?.title}</>:''}<br />
+                                        {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
                                         <span><strong>SKU: </strong>{item?.sku}</span><br />
                                         {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                     </td>
                                     <td>{item?.quantity}</td>
-                                    <td>{item?.custom_design || "N/A"}</td>
+                                    <td>
+                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (<div className="m-3"></div>)}
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (
+                                            <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF</Link>
+                                        )}
+                                        {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.gift_url) && (
+                                            <Link to={item?.gift_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download Gift Image</Link>
+                                        )}
+                                    </td>
                                 </tr>
                             ))}
 
@@ -150,34 +203,92 @@ const OrderView = () => {
                                     <Card.Title>{selected_order_item?.title}</Card.Title>
                                     <CardText>
                                         <p><strong>Custom Design: </strong>{selected_order_item?.custom_design || "N/A"}</p>
-                                        <h5>Attachments</h5>
-                                        <Form noValidate onSubmit={formikUpload.handleSubmit}>
-                                                <Form.Group className="mb-3" controlId="formBasicEmail">
-                                                    <Form.Label className="text-center">
-                                                        File to upload
-                                                    </Form.Label>
-                                                    <Form.Control
-                                                        type="file"
-                                                        onChange={(event) => {
-                                                            const input = event.currentTarget as HTMLInputElement;
-                                                            if (input.files && input.files.length > 0) {
-                                                                const file = input.files[0];
-                                                                formikUpload.setFieldValue("attached_file", file);
-                                                            }
-                                                          }}
-                                                    />
-                                                    {formikUpload.touched.attached_file && formikUpload.errors.attached_file ? (
-                                                        <Form.Control.Feedback>{formikUpload.errors.attached_file}</Form.Control.Feedback>
-                                                    ) : null}
-                                                </Form.Group>
+                                        {selected_order_item.status == OrderStatus.STATUS_PROCESSING && (
+                                            <>
+                                                <h5>Add Design</h5>
+                                                <Form noValidate onSubmit={formikUpload.handleSubmit}>
+                                                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                                                        <Form.Label className="text-center">
+                                                            File to upload
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="file"
+                                                            onChange={(event) => {
+                                                                const input = event.currentTarget as HTMLInputElement;
+                                                                if (input.files && input.files.length > 0) {
+                                                                    const file = input.files[0];
+                                                                    formikUpload.setFieldValue("attached_file", file);
+                                                                }
+                                                            }}
+                                                        />
+                                                        {formikUpload.touched.attached_file && formikUpload.errors.attached_file ? (
+                                                            <Form.Control.Feedback>{formikUpload.errors.attached_file}</Form.Control.Feedback>
+                                                        ) : null}
+                                                    </Form.Group>
 
-                                                <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting}>
-                                                        {isSubmitting ? "Please wait..." : "Upload and notify"}
-                                                    </Button>
-                                                </div>
-                                            </Form>
-                                            {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={(id, status) => console.log(`${id}: ${status}`)}></Attachment></Col>)}
+                                                    <div className="d-grid">
+                                                        <Button variant="tertiary" type="submit" disabled={isSubmitting}>
+                                                            {isSubmitting ? "Please wait..." : "Upload and notify"}
+                                                        </Button>
+                                                    </div>
+                                                </Form>
+                                            </>
+                                        )}
+
+                                        {selected_order_item.status != OrderStatus.STATUS_PROCESSING && (
+                                            <>
+                                                <h5>Dispatch & Mark production Ready</h5>
+                                                <Form noValidate onSubmit={formikDispatch.handleSubmit}>
+                                                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                                                        <Form.Label className="text-center">
+                                                            Pdf File
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="file"
+                                                            name="pdf_file"
+                                                            onChange={(event) => {
+                                                                const input = event.currentTarget as HTMLInputElement;
+                                                                if (input.files && input.files.length > 0) {
+                                                                    const file = input.files[0];
+                                                                    formikDispatch.setFieldValue("pdf_file", file);
+                                                                }
+                                                            }}
+                                                        />
+                                                        {formikDispatch.touched.pdf_file && formikDispatch.errors.pdf_file ? (
+                                                            <Form.Control.Feedback>{formikDispatch.errors.pdf_file}</Form.Control.Feedback>
+                                                        ) : null}
+                                                    </Form.Group>
+
+                                                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                                                        <Form.Label className="text-center">
+                                                            Gift Image
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                            type="file"
+                                                            name="gift_file"
+                                                            onChange={(event) => {
+                                                                const input = event.currentTarget as HTMLInputElement;
+                                                                if (input.files && input.files.length > 0) {
+                                                                    const file = input.files[0];
+                                                                    formikDispatch.setFieldValue("gift_file", file);
+                                                                }
+                                                            }}
+                                                        />
+                                                        {formikDispatch.touched.gift_file && formikDispatch.errors.gift_file ? (
+                                                            <Form.Control.Feedback>{formikDispatch.errors.gift_file}</Form.Control.Feedback>
+                                                        ) : null}
+                                                    </Form.Group>
+
+                                                    <div className="d-grid">
+                                                        <Button variant="tertiary" type="submit" disabled={isSubmitting}>
+                                                            {isSubmitting ? "Please wait..." : "Upload and Dispatch"}
+                                                        </Button>
+                                                    </div>
+                                                </Form>
+                                            </>
+                                        )}
+                                        <h5 className="mt-2">Attachments</h5>
+                                        {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={(id, status) => console.log(`${id}: ${status}`)}></Attachment></Col>)}
                                     </CardText>
                                 </>
                             ) : (<>

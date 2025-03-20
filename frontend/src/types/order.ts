@@ -12,6 +12,8 @@ export interface IOrderItem {
     quantity?: string;
     properties: IOrderItemProperties[];
     status: string;
+    pdf_url?: string;
+    gift_url?: string;
     custom_design?: string;
     created: string;
     updated: string;

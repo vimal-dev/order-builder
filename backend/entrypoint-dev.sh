@@ -3,5 +3,5 @@
 set -e
 
 # alembic upgrade head
-flask db upgrade
-flask --app app.wsgi run --host=0.0.0.0
+flask --app app.wsgi:application db upgrade
+flask --app app.wsgi:application run --host=0.0.0.0

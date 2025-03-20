@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {useAuthenticatedAxios} from "./useAxios";
-import {get as _get, omit as _omit} from "lodash";
+import React, { useEffect, useState } from "react";
+import { useAuthenticatedAxios } from "./useAxios";
+import { get as _get, omit as _omit } from "lodash";
 import moment from "moment";
 
 export enum FilterStringOperators {
@@ -56,52 +56,52 @@ const getFilterOperators = (fieldType: AVAILABLE_FIELD_TYPES): Array<AvailableFi
     switch (fieldType) {
         case "string":
             operators = [
-                {value: FilterStringOperators.EQUAL_TO, label: "Equals TO", columns: 1},
-                {value: FilterStringOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1},
-                {value: FilterStringOperators.IS_EMPTY, label: "Is Empty", columns: 0},
-                {value: FilterStringOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0},
-                {value: FilterStringOperators.STARTS_WITH, label: "Starts With", columns: 1},
-                {value: FilterStringOperators.ENDS_WITH, label: "Ends With", columns: 1},
-                {value: FilterStringOperators.CONTAINS, label: "Contains", columns: 1},
-                {value: FilterStringOperators.INCLUDES, label: "Includes", columns: 1},
-                {value: FilterStringOperators.NOT_INCLUDES, label: "Not Includes", columns: 1}
+                { value: FilterStringOperators.EQUAL_TO, label: "Equals TO", columns: 1 },
+                { value: FilterStringOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1 },
+                { value: FilterStringOperators.IS_EMPTY, label: "Is Empty", columns: 0 },
+                { value: FilterStringOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0 },
+                { value: FilterStringOperators.STARTS_WITH, label: "Starts With", columns: 1 },
+                { value: FilterStringOperators.ENDS_WITH, label: "Ends With", columns: 1 },
+                { value: FilterStringOperators.CONTAINS, label: "Contains", columns: 1 },
+                { value: FilterStringOperators.INCLUDES, label: "Includes", columns: 1 },
+                { value: FilterStringOperators.NOT_INCLUDES, label: "Not Includes", columns: 1 }
             ];
             break;
         case "number":
             operators = [
-                {value: FilterNumberOperators.EQUAL_TO, label: "Equals TO", columns: 1},
-                {value: FilterNumberOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1},
-                {value: FilterNumberOperators.IS_EMPTY, label: "Is Empty", columns: 0},
-                {value: FilterNumberOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0},
-                {value: FilterNumberOperators.LESS_THAN, label: "Less Than", columns: 1},
-                {value: FilterNumberOperators.LESS_THAN_EQUAL, label: "Less Than Equals TO", columns: 1},
-                {value: FilterNumberOperators.GREATER_THAN, label: "Greater Than", columns: 1},
-                {value: FilterNumberOperators.GREATER_THAN_EQUAL, label: "Greater Than Equals TO", columns: 1},
-                {value: FilterNumberOperators.BETWEEN, label: "In Between", columns: 2},
-                {value: FilterNumberOperators.NOT_BETWEEN, label: "Not In Between", columns: 2},
-                {value: FilterNumberOperators.INCLUDES, label: "Includes", columns: 1},
-                {value: FilterNumberOperators.NOT_INCLUDES, label: "Not Includes", columns: 1}
+                { value: FilterNumberOperators.EQUAL_TO, label: "Equals TO", columns: 1 },
+                { value: FilterNumberOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1 },
+                { value: FilterNumberOperators.IS_EMPTY, label: "Is Empty", columns: 0 },
+                { value: FilterNumberOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0 },
+                { value: FilterNumberOperators.LESS_THAN, label: "Less Than", columns: 1 },
+                { value: FilterNumberOperators.LESS_THAN_EQUAL, label: "Less Than Equals TO", columns: 1 },
+                { value: FilterNumberOperators.GREATER_THAN, label: "Greater Than", columns: 1 },
+                { value: FilterNumberOperators.GREATER_THAN_EQUAL, label: "Greater Than Equals TO", columns: 1 },
+                { value: FilterNumberOperators.BETWEEN, label: "In Between", columns: 2 },
+                { value: FilterNumberOperators.NOT_BETWEEN, label: "Not In Between", columns: 2 },
+                { value: FilterNumberOperators.INCLUDES, label: "Includes", columns: 1 },
+                { value: FilterNumberOperators.NOT_INCLUDES, label: "Not Includes", columns: 1 }
             ];
             break;
         case "toggle":
             operators = [
-                {value: FilterBooleanOperators.TOGGLE, label: "Toggle", columns: 1},
-                {value: FilterBooleanOperators.IS_EMPTY, label: "Is Empty", columns: 0},
-                {value: FilterBooleanOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0},
+                { value: FilterBooleanOperators.TOGGLE, label: "Toggle", columns: 1 },
+                { value: FilterBooleanOperators.IS_EMPTY, label: "Is Empty", columns: 0 },
+                { value: FilterBooleanOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0 },
             ];
             break;
         case "datetime":
             operators = [
-                {value: FilterDatetimeOperators.EQUAL_TO, label: "Equals TO", columns: 1},
-                {value: FilterDatetimeOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1},
-                {value: FilterDatetimeOperators.IS_EMPTY, label: "Is Empty", columns: 0},
-                {value: FilterDatetimeOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0},
-                {value: FilterDatetimeOperators.LESS_THAN, label: "Less Than", columns: 1},
-                {value: FilterDatetimeOperators.LESS_THAN_EQUAL, label: "Less Than Equals TO", columns: 1},
-                {value: FilterDatetimeOperators.GREATER_THAN, label: "Greater Than", columns: 1},
-                {value: FilterDatetimeOperators.GREATER_THAN_EQUAL, label: "Greater Than Equals TO", columns: 1},
-                {value: FilterDatetimeOperators.BETWEEN, label: "In Between", columns: 2},
-                {value: FilterDatetimeOperators.NOT_BETWEEN, label: "Not In Between", columns: 2},
+                { value: FilterDatetimeOperators.EQUAL_TO, label: "Equals TO", columns: 1 },
+                { value: FilterDatetimeOperators.NOT_EQUAL_TO, label: "NOT Equals TO", columns: 1 },
+                { value: FilterDatetimeOperators.IS_EMPTY, label: "Is Empty", columns: 0 },
+                { value: FilterDatetimeOperators.IS_NOT_EMPTY, label: "Is Not Empty", columns: 0 },
+                { value: FilterDatetimeOperators.LESS_THAN, label: "Less Than", columns: 1 },
+                { value: FilterDatetimeOperators.LESS_THAN_EQUAL, label: "Less Than Equals TO", columns: 1 },
+                { value: FilterDatetimeOperators.GREATER_THAN, label: "Greater Than", columns: 1 },
+                { value: FilterDatetimeOperators.GREATER_THAN_EQUAL, label: "Greater Than Equals TO", columns: 1 },
+                { value: FilterDatetimeOperators.BETWEEN, label: "In Between", columns: 2 },
+                { value: FilterDatetimeOperators.NOT_BETWEEN, label: "Not In Between", columns: 2 },
             ];
             break;
         default:
@@ -115,9 +115,9 @@ export interface LabelValueInterface {
     value: string;
 }
 
-export interface SortableFieldsInterface extends LabelValueInterface{}
+export interface SortableFieldsInterface extends LabelValueInterface { }
 
-export interface AvailableFieldOperatorsInterface extends LabelValueInterface{
+export interface AvailableFieldOperatorsInterface extends LabelValueInterface {
     value: AVAILABLE_OPERATORS;
     columns: number;
 }
@@ -156,13 +156,13 @@ export interface UseFilterableProps {
 }
 
 export interface Meta {
-    next_token: string|null;
+    next_token: string | null;
 }
 
-export interface UseFilterableResult {
+export interface UseFilterableResult<T> {
     loading: boolean,
     meta: Record<string, any>,
-    records: Array<Record<string, any>>,
+    records: Array<T>,
     exportRecords: () => void,
     fetchRecords: () => void,
     applyFilters: () => void,
@@ -176,20 +176,20 @@ export interface UseFilterableResult {
     resetNextToken: () => void,
     onFilterColumnSelectHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => void,
     onFilterOperatorSelectHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => void,
-    onFilterValueOneChangeHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => void,
-    onFilterValueTwoChangeHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => void
+    onFilterValueOneChangeHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => void,
+    onFilterValueTwoChangeHandler: (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => void
 }
 
-const useFilter = (props: UseFilterableProps): UseFilterableResult => {
+const useFilter = <T>(props: UseFilterableProps): UseFilterableResult<T> => {
     const [loading, setLoading] = useState<boolean>(false);
-    const [meta, setMeta] = useState<Meta>({next_token: null});
-    const [records, setRecords] = useState<Array<Record<string, any>>>([]);
+    const [meta, setMeta] = useState<Meta>({ next_token: null });
+    const [records, setRecords] = useState<Array<T>>([]);
     const [selectedFilters, setSelectedFilters] = useState<Array<AppliedFiltersInterface>>([]);
     const [appliedSorts, setAppliedSorts] = useState<Record<string, any>>({});
     const [refresh, setRefresh] = useState<number>(0);
     const axios = useAuthenticatedAxios();
 
-    const {endpoint, exportEndpoint, exportIdentifier, queryParams} = props;
+    const { endpoint, exportEndpoint, exportIdentifier, queryParams } = props;
 
     useEffect(() => {
         fetchRecords()
@@ -200,27 +200,25 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
         try {
             let params: Record<string, any> = buildQuery();
 
-            const response = await axios.get(endpoint, {params: params});
-            if(_get(response, "data.success", false)) {
-                let response_devices = _get(response, "data.data.items", [])
-                if ("next_token" in params) {
-                    // For next page records we append the response items
-                    if(response_devices.length) {
-                        setRecords([...records, ...response_devices])
-                    }
-                } else {
-                    // For First page records we create new array with response items
-                    setRecords([...response_devices])
+            const response = await axios.get(endpoint, { params: params });
+            let response_devices = _get(response, "data.data.items", [])
+            if ("next_token" in params) {
+                // For next page records we append the response items
+                if (response_devices.length) {
+                    setRecords([...records, ...response_devices])
                 }
-
-                const next_token = _get(response, "data.data.next_token", null)
-                setMeta({
-                    ...meta,
-                    ...{next_token: next_token}
-                })
+            } else {
+                // For First page records we create new array with response items
+                setRecords([...response_devices])
             }
-        } catch (e) {
 
+            const next_token = _get(response, "data.data.next_token", null)
+            setMeta({
+                ...meta,
+                ...{ next_token: next_token }
+            })
+        } catch (e) {
+            console.log(e)
         }
         setLoading(false)
     };
@@ -233,7 +231,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
                 const data = {
                     "export_type": exportIdentifier,
                     "export_options": {
-                        "filters": params["f"]? JSON.parse(params["f"]):[],
+                        "filters": params["f"] ? JSON.parse(params["f"]) : [],
                         "sorting": []
 
                     }
@@ -258,7 +256,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
                 // f[`f[${i}][column]`] = filter.field;
                 // f[`f[${i}][operator]`] = filter.operator
 
-                if(filter.query_1 && Array.isArray(filter.query_1)) {
+                if (filter.query_1 && Array.isArray(filter.query_1)) {
                     const list = filter.query_1.map((item) => {
                         return item.value;
                     });
@@ -274,12 +272,12 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
             }
         });
         const others: Record<string, any> = {}
-        if("next_token" in meta && meta["next_token"]) {
+        if ("next_token" in meta && meta["next_token"]) {
             others["next_token"] = meta["next_token"]
         }
         return {
             ...queryParams,
-            ...{"f": f.length? JSON.stringify(f): null},
+            ...{ "f": f.length ? JSON.stringify(f) : null },
             ...others
         };
     };
@@ -291,7 +289,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
 
     const sortColumn = (column: string) => {
         if (column in appliedSorts) {
-            appliedSorts[column] = appliedSorts[column] === "desc"? "asc":"desc"
+            appliedSorts[column] = appliedSorts[column] === "desc" ? "asc" : "desc"
         } else {
             appliedSorts[column] = "asc";
         }
@@ -339,14 +337,14 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
 
     const onFilterColumnSelectHandler = (_f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
-        if(value.length<=0) {
+        if (value.length <= 0) {
             return;
         }
-        const obj:FilterableFieldsInterface = JSON.parse(value);
+        const obj: FilterableFieldsInterface = JSON.parse(value);
         const filterOperators = getFilterOperators(obj.type);
         selectedFilters[i] = {
             field: obj.value,
-            operator: filterOperators.length? filterOperators[0]?.value:"",
+            operator: filterOperators.length ? filterOperators[0]?.value : "",
             operators: filterOperators,
             query_1: null,
             query_2: null,
@@ -361,10 +359,10 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
 
     const onFilterOperatorSelectHandler = (_f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
-        if(value.length<=0) {
+        if (value.length <= 0) {
             return;
         }
-        const obj:AvailableFieldOperatorsInterface = JSON.parse(value);
+        const obj: AvailableFieldOperatorsInterface = JSON.parse(value);
         const sf: AppliedFiltersInterface = selectedFilters[i];
         sf.operator = obj.value;
         sf.columns = obj.columns;
@@ -374,7 +372,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
         ]);
     }
 
-    const onFilterValueOneChangeHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
+    const onFilterValueOneChangeHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const value = e.target.value;
         const sf: AppliedFiltersInterface = selectedFilters[i];
         if (f.columnType === "datetime") {
@@ -388,7 +386,7 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
         ]);
     }
 
-    const onFilterValueTwoChangeHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement|HTMLInputElement>) => {
+    const onFilterValueTwoChangeHandler = (f: AppliedFiltersInterface, i: number, e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
         const value = e.target.value;
         const sf: AppliedFiltersInterface = selectedFilters[i];
         if (f.columnType === "datetime") {
@@ -403,10 +401,10 @@ const useFilter = (props: UseFilterableProps): UseFilterableResult => {
     }
 
     const resetNextToken = () => {
-      setMeta({
-        ...meta,
-        next_token: null
-    })
+        setMeta({
+            ...meta,
+            next_token: null
+        })
     };
 
     return {

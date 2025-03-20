@@ -22,8 +22,64 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     networks:
       - orderbuilder
+
+  worker:
+    build:
+      args:
+        - USER_UID=1000
+      context: ./backend
+      dockerfile: 'Dockerfile.dev'
+    entrypoint: [ "/bin/sh", "entrypoint-worker.sh" ]
+    env_file:
+      - ./backend/.env.docker
+    volumes:
+      - ./backend:/code
+      - /code/.venv  # Prevents overwriting the Docker venv
+    depends_on:
+      mysql:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - orderbuilder
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./frontend/.env.docker
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - ./frontend/node_modules:/app/node_modules
+    networks:
+      orderbuilder:
+        aliases:
+          - frontend
+
+  cache:
+    image: redis:6.2-alpine
+    restart: unless-stopped
+    ports:
+      - '16379:6379'
+    command: redis-server --save 20 1 --loglevel warning  # --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - orderbuilder-cache-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      orderbuilder:
+        aliases:
+          - cache
 
   mysql:
     platform: linux/amd64 #for platform error on Apple M1 chips
@@ -44,19 +100,3 @@ services:
       retries: 10
     networks:
       - orderbuilder
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    env_file:
-      - ./frontend/.env.docker
-    ports:
-      - '3000:3000'
-    volumes:
-      - ./frontend:/app
-      - ./frontend/node_modules:/app/node_modules
-    networks:
-      orderbuilder:
-        aliases:
-          - frontend

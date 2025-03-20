@@ -8,6 +8,8 @@ class Config(object):
     ADMIN_EMAIL = 'root@localhost'
     APP_URL = "http://localhost:3000"
 
+    #APPLICATION_ROOT = "/"
+
     SECRET_KEY = '8f42a73054b1749f8f58848be5e6502c'
 
     JWT_PRIVATE_KEY = ''
@@ -53,12 +55,24 @@ class Config(object):
     UPLOAD_FOLDER = os.path.join(STORAGE_PATH, 'uploads')
 
     AWS_REGION = "ap-south-1"
-    AWS_ACCESS_KEY= "DO801E3JC24MMDJFYRHM"
-    AWS_SECRET_KEY= "n7CPmT9B4wxR2fFOg4KTr3//2jIAba5XZETwzQUJNJo"
-    AWS_ENDPOINT_URL= "https://abstrax.nyc3.digitaloceanspaces.com"
-    AWS_S3_BUCKET = "abstrax"
+    AWS_ACCESS_KEY= "access_key"
+    AWS_SECRET_KEY= "secret_key"
+    AWS_ENDPOINT_URL= "https://localhost"
+    AWS_S3_BUCKET = "bucket_name"
 
     RECORDS_LIMIT = 25
+
+    CELERY_BROKER_URL = 'redis://localhost:16379/0'
+    CELERY_RESULT_BACKEND= 'redis://localhost:16379/0'
+
+    GRAPHQL_FOLDER = os.path.join(os.path.realpath(os.path.dirname(__file__)), "graphql")
+
+    MS_CLIENT_ID = "client_id"
+    MS_TENANT_ID = "tenant_id"
+    MS_CLIENT_SECRET = "secret-key"
+    MS_AUTHORITY = "https://login.microsoftonline.com/common"
+    MS_SCOPES = ["https://graph.microsoft.com/.default"]
+    MS_MAIL_USERNAME = "user@example.com"
 
     # @property
     # def SHOPIFY_API_SCOPES_LIST(self):

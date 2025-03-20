@@ -8,6 +8,11 @@ from app.database import db
 @dataclass
 class Order(db.Model):
     __tablename__ = 'core_orders'
+
+    STATUS_PROCESSING = "Processing"
+    STATUS_DESIGN_APPROVED = "Design Approved"
+    STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+
     id: Mapped[str] = mapped_column(String(190), primary_key=True)
     order_number: Mapped[str] = mapped_column(String(190))
     customer_name: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
@@ -21,6 +26,12 @@ class Order(db.Model):
 
 class OrderItem(db.Model):
     __tablename__ = 'core_order_items'
+
+    STATUS_PROCESSING = "Processing"
+    STATUS_DESIGN_APPROVED = "Design Approved"
+    STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+
+
     id: Mapped[str] = mapped_column(String(190), primary_key=True)
     order_id: Mapped[str] = mapped_column(
         ForeignKey("core_orders.id", ondelete="CASCADE"),
@@ -33,8 +44,11 @@ class OrderItem(db.Model):
     title: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     sku: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
     status: Mapped[str] = mapped_column(String(190), nullable=True, default=None)
+    pdf_file: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    gift_image: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     # JSON field for storing flexible structured data
     properties: Mapped[List[Dict[str, Any]]] = mapped_column(JSON, nullable=True, default=[])
+    others: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=True, default={})
     attachments: Mapped[List["Attachment"]] = relationship(back_populates="order_item")
     created = mapped_column(DateTime, nullable=False)
     updated = mapped_column(DateTime, nullable=False)

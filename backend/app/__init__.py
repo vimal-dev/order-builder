@@ -7,7 +7,7 @@ from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 
 from app import config
 from app.database import db
-
+from app.services.celery import celery_init_app
 
 def create_app() -> Flask:
     # create and configure the app
@@ -27,6 +27,18 @@ def create_app() -> Flask:
     # initialize the app with the extension
     db.init_app(app)
     migrate = Migrate(app, db)
+
+    app.config.from_mapping(
+        CELERY=dict(
+            broker_url=app.config.get("CELERY_BROKER_URL"),
+            result_backend=app.config.get("CELERY_RESULT_BACKEND"),
+            broker_connection_retry_on_startup=True,
+            task_create_missing_queues=True,
+            task_ignore_result=True,
+        ),
+    )
+
+    celery_init_app(app)
 
     from app.routes import router
     app.register_blueprint(router, url_prefix=api_prefix)

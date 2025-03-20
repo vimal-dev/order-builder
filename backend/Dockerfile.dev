@@ -46,6 +46,7 @@ COPY --chown=appuser:appuser app app
 COPY --chown=appuser:appuser gunicorn_config.py .
 COPY --chown=appuser:appuser entrypoint.sh .
 COPY --chown=appuser:appuser entrypoint-dev.sh .
+COPY --chown=appuser:appuser entrypoint-worker.sh .
 COPY --chown=appuser:appuser migrations migrations
 
 # Ensure scripts are executable

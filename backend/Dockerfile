@@ -49,6 +49,7 @@ USER appuser
 COPY --chown=appuser:appuser app app
 COPY --chown=appuser:appuser gunicorn_config.py gunicorn_config.py
 COPY --chown=appuser:appuser entrypoint.sh entrypoint.sh
+COPY --chown=appuser:appuser entrypoint-worker.sh .
 COPY --chown=appuser:appuser migrations migrations
 
 # CMD ["gunicorn", "--config", "./gunicorn_config.py", "app.wsgi"]

@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 
+
 router = Blueprint("health", __name__)
 
 @router.route('/health-check', methods=['GET'])

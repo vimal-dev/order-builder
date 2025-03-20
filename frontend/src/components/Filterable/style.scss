@@ -1,0 +1,122 @@
+.filterable {
+  &-mid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0px;
+  }
+  &-sort {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 200px;
+  }
+  &-direction {
+    color: #340F49;
+  }
+}
+
+.filters {
+  &-item {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: start;
+    position: relative;
+  }
+  &-column {
+    padding-right: 15px;
+    width: 25%;
+  }
+  &-operator {
+    padding-right: 15px;
+    width: 25%;
+  }
+  &-query_1 {
+    width: 23%;
+    padding-right: 15px;
+  }
+  &-full {
+    width: 46%;
+  }
+  &-date {
+    display: flex;
+  }
+  &-query_2 {
+    width: 23%;
+  }
+  &-remove-wrap {
+    width: 4%;
+    text-align: right;
+  }
+  &-control {
+    &-item {
+      display: inline-block;
+      position: relative;
+      margin-left: 7px;
+      a{
+        &:hover {color:#FFFFFF !important;}
+      }
+      &-line {
+        z-index: 2;
+        // background: red;
+        background: #6c757d;
+        position: absolute;
+        bottom: 10px;
+        left: -10px;
+        height: 2px;
+        width: 10px;
+      }
+    }
+  }
+  &-remove {
+    display: inline-block;
+    color: #FF0000;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    &:focus {
+      outline-style: dotted;
+      outline-width: 1px;
+      outline-offset: 1px;
+      outline-color: #340F49;
+    }
+    &:active {
+      box-shadow: inset 0 .5rem 1rem rgba(#000000, .15);
+    }
+  }
+  &-title {
+    font-size: 16px;
+    line-height: 18px;
+    border-bottom: 1px solid #6c757d;
+    .form-control{
+      width: auto;
+      display: inline-block;
+    }
+  }
+  &-export {
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  &-columns {
+    margin-left: 8px;
+    width: 130px;
+  }
+  &-direction {
+    cursor: pointer;
+    margin-left: 8px;
+    padding: 0px 4px;
+    color: #340F49;
+  }
+  &-line {
+    background: #6c757d;
+    position: absolute;
+    bottom: -10px;
+    left: 10px;
+    height: 10px;
+    width: 2px;
+  }
+}
+.filter-toggle {
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
