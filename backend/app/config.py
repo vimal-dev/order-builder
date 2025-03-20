@@ -55,10 +55,10 @@ class Config(object):
     UPLOAD_FOLDER = os.path.join(STORAGE_PATH, 'uploads')
 
     AWS_REGION = "ap-south-1"
-    AWS_ACCESS_KEY= "DO801E3JC24MMDJFYRHM"
-    AWS_SECRET_KEY= "n7CPmT9B4wxR2fFOg4KTr3//2jIAba5XZETwzQUJNJo"
-    AWS_ENDPOINT_URL= "https://abstrax.nyc3.digitaloceanspaces.com"
-    AWS_S3_BUCKET = "abstrax"
+    AWS_ACCESS_KEY= "access_key"
+    AWS_SECRET_KEY= "secret_key"
+    AWS_ENDPOINT_URL= "https://localhost"
+    AWS_S3_BUCKET = "bucket_name"
 
     RECORDS_LIMIT = 25
 
@@ -67,12 +67,12 @@ class Config(object):
 
     GRAPHQL_FOLDER = os.path.join(os.path.realpath(os.path.dirname(__file__)), "graphql")
 
-    MS_CLIENT_ID = "e0775e48-f977-4fe6-9236-fa86e5d811a9"
-    MS_TENANT_ID = "906006d0-051a-4dd6-a9bb-38e4eec50b32"
-    MS_CLIENT_SECRET = "mKe8Q~-yg0c6fUMkBRRos8b6bp4aLYre3aPx2dr8"
-    MS_AUTHORITY = f"https://login.microsoftonline.com/{MS_TENANT_ID}"
+    MS_CLIENT_ID = "client_id"
+    MS_TENANT_ID = "tenant_id"
+    MS_CLIENT_SECRET = "secret-key"
+    MS_AUTHORITY = "https://login.microsoftonline.com/common"
     MS_SCOPES = ["https://graph.microsoft.com/.default"]
-    MS_MAIL_USERNAME = "info@getloode.com"
+    MS_MAIL_USERNAME = "user@example.com"
 
     # @property
     # def SHOPIFY_API_SCOPES_LIST(self):

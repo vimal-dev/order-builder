@@ -16,7 +16,7 @@ def get_mailer():
 def send_login_otp(access_token, email: str, data: Dict):
     body = render_template('emails/login_otp.html', **data)
     try:
-        send_email_via_graph_api(access_token, "Your OTP for login", email, body)
+        send_email_via_graph_api(access_token, "Your single-use code", email, body)
     except Exception as e:
         current_app.logger.error(str(e))
 

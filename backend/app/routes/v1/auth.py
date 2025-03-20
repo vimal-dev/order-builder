@@ -66,7 +66,7 @@ def login():
             otp = totp.now()
             if not debug:
                 access_token = get_outlook_token()
-                send_login_otp(access_token, user.email, {"otp": otp, "app_name": current_app.config.get("APP_NAME")})
+                send_login_otp(access_token, user.email, {"otp": otp, "name":user.name, "app_name": current_app.config.get("APP_NAME")})
             response["code"] = 200
             response["message"] = "Otp sent please check your email"
             if debug:
