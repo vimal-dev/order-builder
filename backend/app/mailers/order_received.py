@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 import click
-from flask import current_app, render_template
-from flask_mail import Message
+from flask import current_app
 from sqlalchemy import asc, or_, select, update
 from app.database import db
-from app.mail import get_mailer
+from app.mail import get_outlook_token, send_order_received
 from app.models.shopify.order import Order
 
 
@@ -57,21 +56,17 @@ class OrderReceived:
     def send_mail(seld, orders: List[Dict]):
         result = []
         with current_app.app_context():
-            mail = get_mailer()
-            with mail.connect() as conn:
-                for order in orders:
-                    msg = Message("Order update",
-                    recipients=[order.get("customer_email")])
-                    data = {
-                        "app_name": current_app.config.get("APP_NAME"),
-                        "customer_name": order.get("customer_name"),
-                    }
-                    msg.html = render_template('emails/order-received.html', **data)
-                    try:
-                        conn.send(msg)
-                        result.append(order.get("id"))
-                    except Exception as e:
-                        current_app.logger.error(str(e))
+            access_token = get_outlook_token()
+            for order in orders:
+                data = {
+                    "app_name": current_app.config.get("APP_NAME"),
+                    "customer_name": order.get("customer_name"),
+                }
+                try:
+                    send_order_received(access_token, order.get("customer_email"), data)
+                    result.append(order.get("id"))
+                except Exception as e:
+                    current_app.logger.error(str(e))
         return result
 
 

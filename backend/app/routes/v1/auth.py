@@ -6,7 +6,7 @@ from app.database import db
 from app.models.user import User
 from app.schemas.auth import LoginSchema, LoginVerifySchema, RegisterSchema, RefreshTokenSchema
 from app.services.auth import jwt_token
-from app.mail import send_login_otp
+from app.mail import get_outlook_token, send_login_otp
 from app.models.refresh_token import RefreshToken
 
 
@@ -65,7 +65,8 @@ def login():
             totp = pyotp.TOTP(user.mfa_secret, interval=interval)
             otp = totp.now()
             if not debug:
-                send_login_otp(user.email, {"otp": otp, "app_name": current_app.config.get("APP_NAME")})
+                access_token = get_outlook_token()
+                send_login_otp(access_token, user.email, {"otp": otp, "app_name": current_app.config.get("APP_NAME")})
             response["code"] = 200
             response["message"] = "Otp sent please check your email"
             if debug:

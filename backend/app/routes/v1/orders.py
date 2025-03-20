@@ -17,7 +17,7 @@ from app.services.auth import token_required
 from app.services.storage import get_spaces_client
 from app.helpers.form import parse_nested_form_data
 from app.validators.file import get_extension
-from app.mail import send_customer_order_update, send_customer_order_revision
+from app.mail import get_outlook_token, send_customer_order_update, send_customer_order_revision
 from app.helpers.filters import build_filters
 from app.helpers.common import decode_next_token, encode_next_token
 from app.tasks import order_item_updated
@@ -231,10 +231,11 @@ def add_attachment(current_user: User, item_id):
                 "customer_email": order_item.order.customer_email,
                 "url": f"{app_url}/order-details"
             }
+            access_token = get_outlook_token()
             if order_item.order.mail_sent:
-                send_customer_order_revision([order_item.order.customer_email], data=mail_data)
+                send_customer_order_revision(access_token, order_item.order.customer_email, data=mail_data)
             else:
-                send_customer_order_update([order_item.order.customer_email], data=mail_data)
+                send_customer_order_update(access_token, order_item.order.customer_email, data=mail_data)
             response["code"] = HTTPStatus.CREATED
         except Exception as e:
             raise ValidationError(f"Failed to upload image: {e}")

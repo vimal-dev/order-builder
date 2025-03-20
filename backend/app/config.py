@@ -67,6 +67,13 @@ class Config(object):
 
     GRAPHQL_FOLDER = os.path.join(os.path.realpath(os.path.dirname(__file__)), "graphql")
 
+    MS_CLIENT_ID = "e0775e48-f977-4fe6-9236-fa86e5d811a9"
+    MS_TENANT_ID = "906006d0-051a-4dd6-a9bb-38e4eec50b32"
+    MS_CLIENT_SECRET = "mKe8Q~-yg0c6fUMkBRRos8b6bp4aLYre3aPx2dr8"
+    MS_AUTHORITY = f"https://login.microsoftonline.com/{MS_TENANT_ID}"
+    MS_SCOPES = ["https://graph.microsoft.com/.default"]
+    MS_MAIL_USERNAME = "info@getloode.com"
+
     # @property
     # def SHOPIFY_API_SCOPES_LIST(self):
     #     return [str(x).strip() for x in self.SHOPIFY_API_SCOPES.split(',')] if self.SHOPIFY_API_SCOPES else []

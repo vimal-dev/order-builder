@@ -5,7 +5,6 @@ from flask import current_app
 from sqlalchemy.dialects.mysql import insert
 
 from app.database import db
-from app.mail import order_received
 from app.models.shopify.order import Order, OrderItem
 
 
@@ -92,6 +91,4 @@ def handle(data: Dict) -> bool:
         })
         db.session.execute(stmt)
     db.session.commit()
-    # if is_new and has_custom_design:
-    #     order_received([order.customer_email], data={"order_number": order.order_number})
     return True
