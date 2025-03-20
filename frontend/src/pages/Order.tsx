@@ -44,6 +44,10 @@ const Order = () => {
             try {
                 const response = await axios.post(`/o/details`, values);
                 setOrder(_get(response, "data.data", null));
+                const order_items = _get(response, "data.data.order_items", []);
+                if(order_items && order_items?.length) {
+                    setSelectedOrderItem(order_items[0])
+                }
             } catch (error: unknown) {
                 if (coreAxios.isAxiosError(error)) {
                     if (error.response && error.response.status === 422) {

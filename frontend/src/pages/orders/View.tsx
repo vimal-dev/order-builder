@@ -116,6 +116,10 @@ const OrderView = () => {
             if (nextCursor) params.cursor = nextCursor;
             const response = await axios.get(`/orders/${id}`, { params });
             setOrder(_get(response, "data.data", null));
+            const order_items = _get(response, "data.data.order_items", []);
+            if(order_items && order_items?.length) {
+                setSelectedOrderItem(order_items[0])
+            }
         } catch (error) {
             console.error("Error fetching orders", error);
         }

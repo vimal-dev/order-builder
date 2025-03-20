@@ -38,10 +38,10 @@ def handle(data: Dict) -> bool:
     for item in items:
 
         properties = item.get("properties", [])
-        custom_design = [p.get("value") for p in properties if p["name"] > "Custom_design"]
+        custom_design = [p.get("value") for p in properties if p["name"] == "Custom_design"]
         custom_design = custom_design[0] if len(custom_design) > 0 else None
 
-        birth_stone = [p.get("value") for p in properties if p["name"] > "Extra charm"]
+        birth_stone = [p.get("value") for p in properties if p["name"] == "Extra charm"]
         birth_stone = birth_stone[0] if len(birth_stone) > 0 else None
 
         variant_title = item.get("variant_title")
