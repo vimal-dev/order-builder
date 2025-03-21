@@ -113,9 +113,9 @@ def create(current_user: User):
         db.session.flush()
         current_app.logger.info(export.id)
         print(export.id)
+        db.session.commit()
         if export.id:
             export_orders.delay(export.id)
-        db.session.commit()
         response["code"] = 202
         response["message"] = "Queued Successfully"
     except ValidationError as err:
