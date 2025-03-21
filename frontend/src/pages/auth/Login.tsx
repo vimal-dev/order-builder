@@ -7,6 +7,7 @@ import config from "../../config";
 import { get as _get } from "lodash";
 import AuthService from "../../services/auth";
 import axios from "axios";
+import logo from "../../assets/logo.png";
 
 const LoginSchema = Yup.object().shape({
     username: Yup.string().email('Invalid email').required('Email is required'),
@@ -76,9 +77,13 @@ const Login = () => {
                         <Card className="shadow rounded-0">
                             <Card.Body>
                                 <div className="mb-3 mt-md-4">
-                                    <h2 className="fw-bold mb-2 text-uppercase">{config.title}</h2>
-                                    {identifier ? <p className=" mb-5">Please enter OTP to login!</p>:<p className=" mb-5">Please enter your registered email!</p>}
-
+                                    <div className="text-center">
+                                        <img
+                                            src={logo}
+                                            alt={config.title}
+                                            height="50"
+                                        />
+                                    </div>
                                     <div className="mb-3">
                                     {identifier ? (
                                             <Form onSubmit={formikOtp.handleSubmit}>
@@ -94,6 +99,9 @@ const Login = () => {
                                                         onBlur={formikOtp.handleBlur}
                                                         value={formikOtp.values.code}
                                                     />
+                                                    <Form.Text muted>
+                                                        Please enter OTP to login!
+                                                    </Form.Text>
                                                     {formikOtp.touched.code && formikOtp.errors.code ? (
                                                         <Form.Control.Feedback type="invalid">{formikOtp.errors.code}</Form.Control.Feedback>
                                                     ) : null}
@@ -120,6 +128,9 @@ const Login = () => {
                                                         value={formikLogin.values.username}
                                                         isInvalid={!!formikLogin.errors.username}
                                                     />
+                                                    <Form.Text muted>
+                                                        Enter your registered email!
+                                                    </Form.Text>
                                                     {formikLogin.touched.username && formikLogin.errors.username ? (
                                                         <Form.Control.Feedback>{formikLogin.errors.username}</Form.Control.Feedback>
                                                     ) : null}

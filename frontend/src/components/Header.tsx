@@ -3,7 +3,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import useAuth from "../hooks/useAuth";
 import {Nav, NavItem} from "react-bootstrap";
 import {Link} from "react-router-dom";
-import logo from "../assets/react.svg";
+import logo from "../assets/logo.png";
 import config from "../config";
 
 function Header() {

@@ -10,6 +10,7 @@ import { useAxios } from '../hooks/useAxios';
 import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
 import Attachment from '../components/front/Attachment';
 import { OrderStatus } from '../enums/order';
+import logo from "../assets/logo.png";
 
 const CredentialsSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -45,7 +46,7 @@ const Order = () => {
                 const response = await axios.post(`/o/details`, values);
                 setOrder(_get(response, "data.data", null));
                 const order_items = _get(response, "data.data.order_items", []);
-                if(order_items && order_items?.length) {
+                if (order_items && order_items?.length) {
                     setSelectedOrderItem(order_items[0])
                 }
             } catch (error: unknown) {
@@ -125,12 +126,19 @@ const Order = () => {
             {order ? (
                 <>
                     <Col>
-                        <div className="border border-3 border-tertiary"></div>
-                        <Row>
+                        <div className="d-flex bg-tertiary justify-content-center py-2 mb-4">
+                            <img
+                                src={logo}
+                                alt={config.title}
+                                height="50"
+                                className='content-align-center'
+                            />
+                        </div>
+                        <h2 className='mb-2 fw-50'>Orders {loading ? "Loading...." : order?.order_number}</h2>
+                        <Row className='g-0'>
                             <Col>
                                 <Row>
                                     <Col>
-                                        <h2 className='mb-2 fw-50'>Orders {loading ? "Loading...." : order?.order_number}</h2>
                                         <Table striped bordered hover>
                                             <thead>
                                                 <tr>
@@ -143,13 +151,13 @@ const Order = () => {
                                                 {order?.order_items.map(item => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                                         <td>
-                                                        {item?.product_name}{item?.title? <><br />{item?.title}</>:''}<br />
-                                                        <span><strong>SKU: </strong>{item?.sku}</span><br />
-                                                        {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
+                                                            {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
+                                                            <span><strong>SKU: </strong>{item?.sku}</span><br />
+                                                            {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                                         </td>
                                                         <td>{item?.quantity}</td>
                                                         <td>
-                                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                                            <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION ? "info" : "success"}>{item?.status}</Badge>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -183,7 +191,7 @@ const Order = () => {
                         </Row>
                         <Modal show={showModal} onHide={handleModalClose}>
                             <Modal.Header closeButton>
-                                <Modal.Title>{formikStatus.values.status === "Accept"? "Accept Design":"Request Revision" }</Modal.Title>
+                                <Modal.Title>{formikStatus.values.status === "Accept" ? "Accept Design" : "Request Revision"}</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
                                 <Form noValidate onSubmit={formikStatus.handleSubmit}>
@@ -225,9 +233,15 @@ const Order = () => {
                             <div className="border border-3 border-tertiary"></div>
                             <Card className="shadow rounded-0">
                                 <Card.Body>
+                                    <div className="text-center">
+                                        <img
+                                            src={logo}
+                                            alt={config.title}
+                                            height="50"
+                                        />
+                                    </div>
                                     <div className="mb-3 mt-md-4">
-                                        <h2 className="fw-bold mb-2 text-uppercase">{config.title}</h2>
-                                        <p className=" mb-5">Please enter your order details!</p>
+                                        <p className="text-center mb-5">Please enter your order details!</p>
                                         <div className="mb-3">
                                             <Form noValidate onSubmit={formikCred.handleSubmit}>
                                                 <Form.Group className="mb-3" controlId="formBasicEmail">
