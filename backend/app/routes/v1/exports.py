@@ -111,6 +111,8 @@ def create(current_user: User):
         export = Export(**data)
         db.session.add(export)
         db.session.flush()
+        current_app.logger.info(export.id)
+        print(export.id)
         if export.id:
             export_orders.delay(export.id)
         db.session.commit()
