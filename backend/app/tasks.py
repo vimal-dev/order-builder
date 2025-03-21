@@ -93,7 +93,7 @@ def export_orders(export_id: int):
             export.message = None
             db.session.commit()
         else:
-            return "Export Request Not found"
+            return f"Export Request Not found ID: {export_id}"
     except Exception as e:
         if export:
             export.status = Export.STATUS_FAILED
