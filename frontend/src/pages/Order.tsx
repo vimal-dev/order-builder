@@ -176,9 +176,9 @@ const Order = () => {
                                     <Card.Body>
                                         {selected_order_item ? (
                                             <>
-                                                <Card.Title>Thank you for your order</Card.Title>
+                                                <Card.Title className='order-details-title'>Thank you for your order</Card.Title>
                                                 <CardText>
-                                                    <p>Your name as a charm</p>
+                                                    <p className='order-details-punchline'>Your name as a charm</p>
                                                     <div>
                                                         {(attachmentStatus === Status.DESIGN_APPROVED || attachmentStatus === Status.READY_FOR_PRODUCTION) && (
                                                             <>
