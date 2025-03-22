@@ -143,8 +143,7 @@ const Order = () => {
                                             <thead>
                                                 <tr>
                                                     <th>Order Item</th>
-                                                    <th>Quantity</th>
-                                                    <th>Status</th>
+                                                    <th>#</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -153,11 +152,9 @@ const Order = () => {
                                                         <td>
                                                             {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
                                                             <span><strong>SKU: </strong>{item?.sku}</span><br />
-                                                            {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                                         </td>
-                                                        <td>{item?.quantity}</td>
                                                         <td>
-                                                            <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION ? "info" : "success"}>{item?.status}</Badge>
+                                                            <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected":"Select"}</Button>
                                                         </td>
                                                     </tr>
                                                 ))}
