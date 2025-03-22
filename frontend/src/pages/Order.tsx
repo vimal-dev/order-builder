@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import config from "../config";
-import { Badge, Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import { Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import * as Yup from 'yup';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
@@ -9,7 +9,6 @@ import { get as _get } from "lodash";
 import { useAxios } from '../hooks/useAxios';
 import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
 import Attachment from '../components/front/Attachment';
-import { OrderStatus } from '../enums/order';
 import logo from "../assets/logo.png";
 
 const CredentialsSchema = Yup.object().shape({
