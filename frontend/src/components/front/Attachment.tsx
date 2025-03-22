@@ -27,18 +27,17 @@ const Attachment: React.FC<MediaComponentProps> = ({ media, handleStatus }) => {
       </div>
       <div className="p-2">
         <h4>{media.name}</h4>
-        <p className="mb-0">
+        <p className="mb-1">
           <strong>Status: </strong><Badge bg={labelClass} className="rounded-0">{media.status}</Badge><br />
-          <strong>Updated On: </strong>{new Date(media.updated).toLocaleString()}
         </p>
         {media.comment && (
-          <p>{media.comment}</p>
+          <p className="mb-1">{media.comment}</p>
         )}
         <Link to={media.url} target="_blank" className="btn btn-sm btn-primary rounded-0">Download</Link>
         {media.status === Status.WAITING_FOR_APPROVAL && (
           <>
-            <Button variant="success" onClick={(_e) => handleStatus(media.id, "Accept")} size="sm" className="rounded-0">Approve Revision</Button>
-            <Button variant="danger" onClick={(_e) => handleStatus(media.id, "Revision")} size="sm" className="rounded-0">Request Revision</Button>
+            <Button variant="success" onClick={(_e) => handleStatus(media.id, "Accept")} size="sm" className="rounded-0">Click Here To Approve</Button>
+            <Button variant="danger" onClick={(_e) => handleStatus(media.id, "Revision")} size="sm" className="rounded-0">Ask For Revision(Wait Time 3-5 Days)</Button>
           </>
         )}
       </div>

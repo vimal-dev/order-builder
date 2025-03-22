@@ -78,6 +78,7 @@ def get_order():
         if order is None:
             response["code"] = 404
             response["message"] = "Not Found"
+            return jsonify(response), response["code"]
         order_obj = serialize_order(order)
         order_obj["order_items"] = [serialize_order_items(i) for i in order.order_items]
         response["data"] = order_obj

@@ -10,6 +10,7 @@ import { useAxios } from '../hooks/useAxios';
 import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
 import Attachment from '../components/front/Attachment';
 import logo from "../assets/logo.png";
+import { Status } from '../enums/order';
 
 const CredentialsSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -27,6 +28,7 @@ const Order = () => {
     const [loading, setLoading] = useState(false);
     const [order, setOrder] = useState<IOrder | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [attachmentStatus, setAttachmentStatus] = useState<string | null>(null);
     const [loadingAttachments, setLoadingAttachments] = useState(false);
     const [selected_order_item, setSelectedOrderItem] = useState<IOrderItem | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -92,7 +94,11 @@ const Order = () => {
             const params: Record<string, any> = {};
             // if (nextCursor) params.cursor = nextCursor;
             const response = await axios.get(`/o/attachments/${selected_order_item?.id}`, { params });
-            setAttachments(_get(response, "data.data.items", []));
+            const attachmentItems = _get(response, "data.data.items", [])
+            if (attachmentItems) {
+                setAttachmentStatus(_get(attachmentItems[0], "status", null))
+            }
+            setAttachments(attachmentItems);
         } catch (error) {
             console.error("Error fetching attachments", error);
         }
@@ -102,14 +108,17 @@ const Order = () => {
     const handleStatus = (id: string | number | null, status: string | null) => {
         formikStatus.setFieldValue("id", id);
         formikStatus.setFieldValue("status", status);
+        if(status === "Accept") {
+            formikStatus.setFieldValue("comment", "Approve");
+        }
         setShowModal(true)
     };
 
     const handleModalClose = () => {
+        setShowModal(false)
         formikStatus.setFieldValue("id", null);
         formikStatus.setFieldValue("status", null);
         formikStatus.setFieldValue("comment", null);
-        setShowModal(false)
     }
 
     useEffect(() => {
@@ -149,11 +158,10 @@ const Order = () => {
                                                 {order?.order_items.map(item => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                                         <td>
-                                                            {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
-                                                            <span><strong>SKU: </strong>{item?.sku}</span><br />
+                                                            {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}
                                                         </td>
                                                         <td>
-                                                            <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected":"Select"}</Button>
+                                                            <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected" : "Select"}</Button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -164,14 +172,28 @@ const Order = () => {
                                 </Row>
                             </Col>
                             <Col>
-                                <Card>
+                                <Card className='rounded-0'>
                                     <Card.Body>
                                         {selected_order_item ? (
                                             <>
-                                                <Card.Title>{selected_order_item?.title}</Card.Title>
+                                                <Card.Title>Thank you for your order</Card.Title>
                                                 <CardText>
-                                                    <p><strong>Custom Design: </strong>{selected_order_item?.custom_design || "N/A"}</p>
-                                                    <h5>Attachments</h5>
+                                                    <p>Your name as a charm</p>
+                                                    <div>
+                                                        {(attachmentStatus === Status.DESIGN_APPROVED || attachmentStatus === Status.READY_FOR_PRODUCTION) && (
+                                                            <>
+                                                                <h5>Thank You</h5>
+                                                                <p>You approved your design. Keep an eye on your inbox, including your span folder. In next 72 hours for further updates.</p>
+                                                                <p className="text-success">! You'll receive a printed design card with your jewelry, but feel free to take a screenshot now if you'd like to save a preview.</p>
+                                                            </>
+                                                        )}
+                                                        {attachmentStatus === Status.REVISION_REQUESTED && (
+                                                            <>
+                                                                <h5>Thank You</h5>
+                                                                <p>Revisions require a careful attention. We are committed to sending you an updated version within 3-5 days.</p>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                     {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={handleStatus}></Attachment></Col>)}
                                                 </CardText>
                                             </>
@@ -191,30 +213,35 @@ const Order = () => {
                             </Modal.Header>
                             <Modal.Body>
                                 <Form noValidate onSubmit={formikStatus.handleSubmit}>
-                                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                                        <Form.Label className="text-center">
-                                            Comment
-                                        </Form.Label>
-                                        <Form.Control
-                                            as="textarea"
-                                            rows={3}
-                                            placeholder="Your comment?"
-                                            name="comment"
-                                            onChange={formikStatus.handleChange}
-                                            onBlur={formikStatus.handleBlur}
-                                            value={formikStatus.values.comment}
-                                        />
-                                        {formikStatus.touched.comment && formikStatus.errors.comment ? (
-                                            <Form.Control.Feedback>{formikStatus.errors.comment}</Form.Control.Feedback>
-                                        ) : null}
-                                    </Form.Group>
-
+                                    {formikStatus.values.status !== "Accept" ? (
+                                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                                            <Form.Label className="text-center">
+                                                Write your request below:
+                                            </Form.Label>
+                                            <Form.Control
+                                                as="textarea"
+                                                rows={3}
+                                                placeholder="Your request?"
+                                                name="comment"
+                                                onChange={formikStatus.handleChange}
+                                                onBlur={formikStatus.handleBlur}
+                                                value={formikStatus.values.comment}
+                                            />
+                                            <Form.Text muted>
+                                                <p>Please make your request as clear as possible for our designer to avoid follow-up questions and speed up the revision process.</p>
+                                                <p>We can provide on design at a time. Please avoid asking to see multiple designs for the same peice at once.</p>
+                                            </Form.Text>
+                                            {formikStatus.touched.comment && formikStatus.errors.comment ? (
+                                                <Form.Control.Feedback>{formikStatus.errors.comment}</Form.Control.Feedback>
+                                            ) : null}
+                                        </Form.Group>
+                                    ) : (<p>Confirm your design, and we'll begin crafting your unique piece of jewelry right away!</p>)}
                                     <div>
                                         <Button className='rounded-0' variant="secondary" onClick={handleModalClose}>
-                                            Close
+                                            {formikStatus.values.status !== "Accept" ? "Close" : "No"}
                                         </Button>
-                                        <Button className='float-end rounded-0' variant="tertiary" type="submit" disabled={isSubmitting}>
-                                            {isSubmitting ? "Please wait..." : "Update"}
+                                        <Button className='float-end rounded-0' variant="jewelry" type="submit" disabled={isSubmitting}>
+                                            {isSubmitting ? "Please wait..." : formikStatus.values.status !== "Accept" ? "Save" : "Confirm"}
                                         </Button>
                                     </div>
                                 </Form>
