@@ -108,7 +108,7 @@ const Login = () => {
                                                 </Form.Group>
 
                                                 <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting}>
+                                                    <Button variant="jewelry" type="submit" disabled={isSubmitting}>
                                                         {isSubmitting ? "Please wait..." : "Login"}
                                                     </Button>
                                                 </div>
@@ -137,7 +137,7 @@ const Login = () => {
                                                 </Form.Group>
 
                                                 <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting}>
+                                                    <Button variant="jewelry" type="submit" disabled={isSubmitting}>
                                                         {isSubmitting ? "Please wait..." : "Login"}
                                                     </Button>
                                                 </div>

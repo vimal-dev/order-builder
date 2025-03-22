@@ -280,7 +280,7 @@ const Order = () => {
                                                 </Form.Group>
 
                                                 <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting || formikCred.values.email === "" || formikCred.values.order_number === ""}>
+                                                    <Button variant="jewelry" type="submit" disabled={isSubmitting || formikCred.values.email === "" || formikCred.values.order_number === ""}>
                                                         {isSubmitting ? "Please wait..." : "Fetch Order"}
                                                     </Button>
                                                 </div>
