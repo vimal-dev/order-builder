@@ -16,6 +16,10 @@ def handle(data: Dict) -> bool:
     order_number = data.get("name")
     items = data.get("line_items", [])
     items = [it for it in items if it.get("product_id") in allowed_products]
+
+    if len(items) <= 0:
+        return True
+
     customer = data.get("customer", {})
     if customer is None:
         return False
