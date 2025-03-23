@@ -9,11 +9,13 @@ from app.models.shopify.order import Order, OrderItem
 
 
 def handle(data: Dict) -> bool:
+    allowed_products = ["8339432734870", "8326071353494"]
     is_new = False
     has_custom_design = False
     order_id = data.get("id")
     order_number = data.get("name")
     items = data.get("line_items", [])
+    items = [it for it in items if it.get("product_id") in allowed_products]
     customer = data.get("customer", {})
     if customer is None:
         return False
