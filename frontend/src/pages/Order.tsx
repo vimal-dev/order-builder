@@ -142,7 +142,7 @@ const Order = () => {
                                 className='content-align-center'
                             />
                         </div>
-                        <h2 className='mb-2 fw-50'>Orders {loading ? "Loading...." : order?.order_number}</h2>
+                        <h2 className='mb-2 fw-50'>Order {loading ? "Loading...." : order?.order_number}</h2>
                         <Row className='g-0'>
                             <Col>
                                 <Row>
@@ -158,7 +158,7 @@ const Order = () => {
                                                 {order?.order_items.map(item => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                                         <td>
-                                                            {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}
+                                                            NAME SELECTION 1
                                                         </td>
                                                         <td>
                                                             <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected" : "Select"}</Button>
