@@ -12,6 +12,7 @@ services:
         - USER_UID=1000
       context: ./backend
       dockerfile: 'Dockerfile.dev'
+    image: "order-builder:dev"
     env_file:
       - ./backend/.env.docker
     ports:
@@ -33,6 +34,7 @@ services:
         - USER_UID=1000
       context: ./backend
       dockerfile: 'Dockerfile.dev'
+    image: "order-builder:dev"
     entrypoint: [ "/bin/sh", "entrypoint-worker.sh" ]
     env_file:
       - ./backend/.env.docker

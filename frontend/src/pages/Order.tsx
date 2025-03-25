@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import config from "../config";
-import { Badge, Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
+import { Button, Card, CardText, Col, Form, Modal, Row, Table } from "react-bootstrap";
 import * as Yup from 'yup';
 import { useEffect, useState } from 'react';
 import { useFormik } from 'formik';
@@ -9,7 +9,8 @@ import { get as _get } from "lodash";
 import { useAxios } from '../hooks/useAxios';
 import { IAttachment, IOrder, IOrderItem } from '../types/front/order';
 import Attachment from '../components/front/Attachment';
-import { OrderStatus } from '../enums/order';
+import logo from "../assets/logo.png";
+import { Status } from '../enums/order';
 
 const CredentialsSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -27,6 +28,7 @@ const Order = () => {
     const [loading, setLoading] = useState(false);
     const [order, setOrder] = useState<IOrder | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
+    const [attachmentStatus, setAttachmentStatus] = useState<string | null>(null);
     const [loadingAttachments, setLoadingAttachments] = useState(false);
     const [selected_order_item, setSelectedOrderItem] = useState<IOrderItem | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -45,7 +47,7 @@ const Order = () => {
                 const response = await axios.post(`/o/details`, values);
                 setOrder(_get(response, "data.data", null));
                 const order_items = _get(response, "data.data.order_items", []);
-                if(order_items && order_items?.length) {
+                if (order_items && order_items?.length) {
                     setSelectedOrderItem(order_items[0])
                 }
             } catch (error: unknown) {
@@ -92,7 +94,11 @@ const Order = () => {
             const params: Record<string, any> = {};
             // if (nextCursor) params.cursor = nextCursor;
             const response = await axios.get(`/o/attachments/${selected_order_item?.id}`, { params });
-            setAttachments(_get(response, "data.data.items", []));
+            const attachmentItems = _get(response, "data.data.items", [])
+            if (attachmentItems) {
+                setAttachmentStatus(_get(attachmentItems[0], "status", null))
+            }
+            setAttachments(attachmentItems);
         } catch (error) {
             console.error("Error fetching attachments", error);
         }
@@ -102,14 +108,17 @@ const Order = () => {
     const handleStatus = (id: string | number | null, status: string | null) => {
         formikStatus.setFieldValue("id", id);
         formikStatus.setFieldValue("status", status);
+        if(status === "Accept") {
+            formikStatus.setFieldValue("comment", "Approve");
+        }
         setShowModal(true)
     };
 
     const handleModalClose = () => {
+        setShowModal(false)
         formikStatus.setFieldValue("id", null);
         formikStatus.setFieldValue("status", null);
         formikStatus.setFieldValue("comment", null);
-        setShowModal(false)
     }
 
     useEffect(() => {
@@ -125,31 +134,34 @@ const Order = () => {
             {order ? (
                 <>
                     <Col>
-                        <div className="border border-3 border-tertiary"></div>
-                        <Row>
+                        <div className="d-flex bg-tertiary justify-content-center py-2 mb-4">
+                            <img
+                                src={logo}
+                                alt={config.title}
+                                height="50"
+                                className='content-align-center'
+                            />
+                        </div>
+                        <h2 className='mb-2 fw-50'>Order {loading ? "Loading...." : order?.order_number}</h2>
+                        <Row className='g-0'>
                             <Col>
                                 <Row>
                                     <Col>
-                                        <h2 className='mb-2 fw-50'>Orders {loading ? "Loading...." : order?.order_number}</h2>
                                         <Table striped bordered hover>
                                             <thead>
                                                 <tr>
                                                     <th>Order Item</th>
-                                                    <th>Quantity</th>
-                                                    <th>Status</th>
+                                                    <th>#</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {order?.order_items.map(item => (
+                                                {order?.order_items.map((item, i) => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                                         <td>
-                                                        {item?.product_name}{item?.title? <><br />{item?.title}</>:''}<br />
-                                                        <span><strong>SKU: </strong>{item?.sku}</span><br />
-                                                        {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
+                                                            NAME SELECTION {i+1}
                                                         </td>
-                                                        <td>{item?.quantity}</td>
                                                         <td>
-                                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                                            <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected" : "Select"}</Button>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -160,14 +172,28 @@ const Order = () => {
                                 </Row>
                             </Col>
                             <Col>
-                                <Card>
+                                <Card className='rounded-0'>
                                     <Card.Body>
                                         {selected_order_item ? (
                                             <>
-                                                <Card.Title>{selected_order_item?.title}</Card.Title>
+                                                <Card.Title className='order-details-title'>Thank you for your order</Card.Title>
                                                 <CardText>
-                                                    <p><strong>Custom Design: </strong>{selected_order_item?.custom_design || "N/A"}</p>
-                                                    <h5>Attachments</h5>
+                                                    <p className='order-details-punchline'>Your name as a charm</p>
+                                                    <div>
+                                                        {(attachmentStatus === Status.DESIGN_APPROVED || attachmentStatus === Status.READY_FOR_PRODUCTION) && (
+                                                            <>
+                                                                <h5>Thank You</h5>
+                                                                <p>You approved your design. Keep an eye on your inbox, including your span folder. In next 72 hours for further updates.</p>
+                                                                <p className="text-success">! You'll receive a printed design card with your jewelry, but feel free to take a screenshot now if you'd like to save a preview.</p>
+                                                            </>
+                                                        )}
+                                                        {attachmentStatus === Status.REVISION_REQUESTED && (
+                                                            <>
+                                                                <h5>Thank You</h5>
+                                                                <p>Revisions require a careful attention. We are committed to sending you an updated version within 3-5 days.</p>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                     {attachments.map(attachment => <Col key={attachment.id}><Attachment media={attachment} handleStatus={handleStatus}></Attachment></Col>)}
                                                 </CardText>
                                             </>
@@ -183,34 +209,39 @@ const Order = () => {
                         </Row>
                         <Modal show={showModal} onHide={handleModalClose}>
                             <Modal.Header closeButton>
-                                <Modal.Title>{formikStatus.values.status === "Accept"? "Accept Design":"Request Revision" }</Modal.Title>
+                                <Modal.Title>{formikStatus.values.status === "Accept" ? "Accept Design" : "Request Revision"}</Modal.Title>
                             </Modal.Header>
                             <Modal.Body>
                                 <Form noValidate onSubmit={formikStatus.handleSubmit}>
-                                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                                        <Form.Label className="text-center">
-                                            Comment
-                                        </Form.Label>
-                                        <Form.Control
-                                            as="textarea"
-                                            rows={3}
-                                            placeholder="Your comment?"
-                                            name="comment"
-                                            onChange={formikStatus.handleChange}
-                                            onBlur={formikStatus.handleBlur}
-                                            value={formikStatus.values.comment}
-                                        />
-                                        {formikStatus.touched.comment && formikStatus.errors.comment ? (
-                                            <Form.Control.Feedback>{formikStatus.errors.comment}</Form.Control.Feedback>
-                                        ) : null}
-                                    </Form.Group>
-
+                                    {formikStatus.values.status !== "Accept" ? (
+                                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                                            <Form.Label className="text-center">
+                                                Write your request below:
+                                            </Form.Label>
+                                            <Form.Control
+                                                as="textarea"
+                                                rows={3}
+                                                placeholder="Your request?"
+                                                name="comment"
+                                                onChange={formikStatus.handleChange}
+                                                onBlur={formikStatus.handleBlur}
+                                                value={formikStatus.values.comment}
+                                            />
+                                            <Form.Text muted>
+                                                <p>Please make your request as clear as possible for our designer to avoid follow-up questions and speed up the revision process.</p>
+                                                <p>We can provide on design at a time. Please avoid asking to see multiple designs for the same peice at once.</p>
+                                            </Form.Text>
+                                            {formikStatus.touched.comment && formikStatus.errors.comment ? (
+                                                <Form.Control.Feedback>{formikStatus.errors.comment}</Form.Control.Feedback>
+                                            ) : null}
+                                        </Form.Group>
+                                    ) : (<p>Confirm your design, and we'll begin crafting your unique piece of jewelry right away!</p>)}
                                     <div>
                                         <Button className='rounded-0' variant="secondary" onClick={handleModalClose}>
-                                            Close
+                                            {formikStatus.values.status !== "Accept" ? "Close" : "No"}
                                         </Button>
-                                        <Button className='float-end rounded-0' variant="tertiary" type="submit" disabled={isSubmitting}>
-                                            {isSubmitting ? "Please wait..." : "Update"}
+                                        <Button className='float-end rounded-0' variant="jewelry" type="submit" disabled={isSubmitting}>
+                                            {isSubmitting ? "Please wait..." : formikStatus.values.status !== "Accept" ? "Save" : "Confirm"}
                                         </Button>
                                     </div>
                                 </Form>
@@ -225,9 +256,15 @@ const Order = () => {
                             <div className="border border-3 border-tertiary"></div>
                             <Card className="shadow rounded-0">
                                 <Card.Body>
+                                    <div className="text-center">
+                                        <img
+                                            src={logo}
+                                            alt={config.title}
+                                            height="50"
+                                        />
+                                    </div>
                                     <div className="mb-3 mt-md-4">
-                                        <h2 className="fw-bold mb-2 text-uppercase">{config.title}</h2>
-                                        <p className=" mb-5">Please enter your order details!</p>
+                                        <p className="text-center mb-5">Please enter your order details!</p>
                                         <div className="mb-3">
                                             <Form noValidate onSubmit={formikCred.handleSubmit}>
                                                 <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -266,7 +303,7 @@ const Order = () => {
                                                 </Form.Group>
 
                                                 <div className="d-grid">
-                                                    <Button variant="tertiary" type="submit" disabled={isSubmitting || formikCred.values.email === "" || formikCred.values.order_number === ""}>
+                                                    <Button variant="jewelry" type="submit" disabled={isSubmitting || formikCred.values.email === "" || formikCred.values.order_number === ""}>
                                                         {isSubmitting ? "Please wait..." : "Fetch Order"}
                                                     </Button>
                                                 </div>

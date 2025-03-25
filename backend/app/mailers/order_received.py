@@ -63,8 +63,9 @@ class OrderReceived:
                     "customer_name": order.get("customer_name"),
                 }
                 try:
-                    send_order_received(access_token, order.get("customer_email"), data)
-                    result.append(order.get("id"))
+                    pass
+                    # send_order_received(access_token, order.get("customer_email"), data)
+                    # result.append(order.get("id"))
                 except Exception as e:
                     current_app.logger.error(str(e))
         return result

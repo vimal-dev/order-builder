@@ -232,10 +232,10 @@ def add_attachment(current_user: User, item_id):
                 "url": f"{app_url}/order-details"
             }
             access_token = get_outlook_token()
-            if order_item.order.mail_sent:
-                send_customer_order_revision(access_token, order_item.order.customer_email, data=mail_data)
-            else:
-                send_customer_order_update(access_token, order_item.order.customer_email, data=mail_data)
+            # if order_item.order.mail_sent:
+            #     send_customer_order_revision(access_token, order_item.order.customer_email, data=mail_data)
+            # else:
+            #     send_customer_order_update(access_token, order_item.order.customer_email, data=mail_data)
             response["code"] = HTTPStatus.CREATED
         except Exception as e:
             raise ValidationError(f"Failed to upload image: {e}")

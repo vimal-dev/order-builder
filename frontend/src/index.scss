@@ -2,10 +2,12 @@
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins";
 // Add variable here to override
-$tertiary: rgb(40, 124, 19);
+$tertiary: rgb(3 46 43);
+$jewelry: rgb(201 166 109);
 
 $theme-colors: map-merge($theme-colors, (
-        "tertiary": $tertiary
+        "tertiary": $tertiary,
+        "jewelry": $jewelry
 ));
 @import '~bootstrap/scss/bootstrap';
 
