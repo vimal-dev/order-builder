@@ -155,10 +155,10 @@ const Order = () => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {order?.order_items.map(item => (
+                                                {order?.order_items.map((item, i) => (
                                                     <tr className={item.id === selected_order_item?.id ? 'activated blue' : ''} key={item.id} onClick={() => { setSelectedOrderItem(item) }}>
                                                         <td>
-                                                            NAME SELECTION 1
+                                                            NAME SELECTION {i+1}
                                                         </td>
                                                         <td>
                                                             <Button variant='jewelry' size='sm' disabled={item.id === selected_order_item?.id ? true : false} onClick={() => { setSelectedOrderItem(item) }}>{item.id === selected_order_item?.id ? "Selected" : "Select"}</Button>
