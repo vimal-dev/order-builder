@@ -6,11 +6,13 @@ from app.database import db
 from app.services.shopify import shopify_webhook, with_shopify
 from app.models.shopify.webhook import Webhook as WebhookModel
 from app.webhooks.orders_create import handle as orders_create
+from app.services.auth import token_required
 
 router = Blueprint("shopify", __name__, url_prefix="shopify")
 
 @router.route('/is-connected', methods=['GET'])
 @with_shopify
+@token_required
 def is_connected():
     connected_shop = None
     shop = shopify.Shop.current()
