@@ -53,6 +53,14 @@ def send_order_revision_requested(access_token, email, data: Dict):
         current_app.logger.error(str(e))
 
 
+def send_order_approved(access_token, email, data: Dict):
+    body = render_template('emails/order-approved.html', **data)
+    try:
+        send_email_via_graph_api(access_token, "Order Approved", email, body)
+    except Exception as e:
+        current_app.logger.error(str(e))
+
+
 
 # def order_received(email: List[str], data: Dict, files=None):
 #     if files is None:
