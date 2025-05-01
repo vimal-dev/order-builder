@@ -46,7 +46,6 @@ class OrderReceived:
 
         query = query.order_by(asc(Order.created)) \
             .limit(100)
-        print(query)
         results = db.session.execute(query).scalars().all()
 
         next_cursor = results[-1].created.isoformat() if results else None
@@ -63,9 +62,8 @@ class OrderReceived:
                     "customer_name": order.get("customer_name"),
                 }
                 try:
-                    pass
-                    # send_order_received(access_token, order.get("customer_email"), data)
-                    # result.append(order.get("id"))
+                    send_order_received(access_token, order.get("customer_email"), data)
+                    result.append(order.get("id"))
                 except Exception as e:
                     current_app.logger.error(str(e))
         return result
