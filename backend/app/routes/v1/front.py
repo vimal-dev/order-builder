@@ -74,7 +74,9 @@ def get_order():
     data = request.get_json()
     try:
         data = OrderDetailsSchema().load(data)
-        order = db.session.query(Order).filter_by(order_number=data.get("order_number"), customer_email=data.get("email")).first()
+        order_number = data.get("order_number")
+        order_number = f"#{order_number}" if order_number[0] != "#" else order_number
+        order = db.session.query(Order).filter_by(order_number=order_number, customer_email=data.get("email")).first()
         if order is None:
             response["code"] = 404
             response["message"] = "Not Found"
