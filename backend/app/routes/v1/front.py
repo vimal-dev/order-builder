@@ -7,6 +7,7 @@ from app.models.shopify.order import Attachment, Order, OrderItem
 from app.validators.file import get_extension
 from app.schemas.front import OrderDetailsSchema, UpdateAttachmentSchema
 from app.tasks import order_item_updated
+from app.mail import get_outlook_token, send_order_revision_requested
 
 router = Blueprint("front", __name__, url_prefix="o")
 
@@ -105,6 +106,7 @@ def update_attachment(item_id, attachment_id):
         data = UpdateAttachmentSchema().load(data)
         order_item = db.session.query(OrderItem).filter_by(id=item_id).first()
         attachment = db.session.query(Attachment).filter_by(id=attachment_id, order_item_id=item_id).first()
+        revision_requested = False
         if attachment is None:
             response["code"] = 404
             response["message"] = "Attachment not found"
@@ -115,11 +117,23 @@ def update_attachment(item_id, attachment_id):
                 attachment.status = Attachment.STATUS_DESIGN_APPROVED
             case "Revision":
                 attachment.status = Attachment.STATUS_REVISION_REQUESTED
+                revision_requested = True
             case _:
                 current_app.logger.info("Invalid status requested")
         attachment.comment = data.get("comment")
         db.session.commit()
         order_item_updated.delay(item_id)
+        if revision_requested:
+            try:
+                mail_data = {
+                    "order_number": order_item.order.order_number,
+                    "app_name": current_app.config.get("APP_NAME"),
+                    "comment": data.get("comment")
+                }
+                access_token = get_outlook_token()
+                send_order_revision_requested(access_token, "info@getloode.com", mail_data)
+            except Exception as e:
+                current_app.logger.error(str(e))
     except ValidationError as err:
         response["code"] = 422
         response["success"] = False
