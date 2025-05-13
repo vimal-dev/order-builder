@@ -34,6 +34,7 @@ def handle(data: Dict) -> bool:
             customer_name=customer_name, 
             customer_email=customer.get("email"),
             status=Order.STATUS_PROCESSING,
+            mail_sent=False
         )
         db.session.add(order)
         db.session.flush()
