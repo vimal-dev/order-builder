@@ -7,6 +7,7 @@ from app.models.shopify.order import Attachment, Order, OrderItem
 from app.validators.file import get_extension
 from app.schemas.front import OrderDetailsSchema, UpdateAttachmentSchema
 from app.tasks import order_item_updated
+from app.mail import get_outlook_token, send_order_approved, send_order_revision_requested
 
 router = Blueprint("front", __name__, url_prefix="o")
 
@@ -74,7 +75,9 @@ def get_order():
     data = request.get_json()
     try:
         data = OrderDetailsSchema().load(data)
-        order = db.session.query(Order).filter_by(order_number=data.get("order_number"), customer_email=data.get("email")).first()
+        order_number = data.get("order_number")
+        order_number = f"#{order_number}" if order_number[0] != "#" else order_number
+        order = db.session.query(Order).filter_by(order_number=order_number, customer_email=data.get("email")).first()
         if order is None:
             response["code"] = 404
             response["message"] = "Not Found"
@@ -110,6 +113,7 @@ def update_attachment(item_id, attachment_id):
         match(data.get("status")):
             case "Accept":
                 order_item.status = OrderItem.STATUS_DESIGN_APPROVED
+                order_item.order.status = Order.STATUS_DESIGN_APPROVED
                 attachment.status = Attachment.STATUS_DESIGN_APPROVED
             case "Revision":
                 attachment.status = Attachment.STATUS_REVISION_REQUESTED
@@ -118,6 +122,23 @@ def update_attachment(item_id, attachment_id):
         attachment.comment = data.get("comment")
         db.session.commit()
         order_item_updated.delay(item_id)
+        try:
+            mail_data = {
+                "order_number": order_item.order.order_number,
+                "app_name": current_app.config.get("APP_NAME"),
+                "comment": data.get("comment")
+            }
+            access_token = get_outlook_token()
+            admin_email = "info@getloode.com"
+            match(data.get("status")):
+                case "Accept":
+                    send_order_approved(access_token, admin_email, mail_data)
+                case "Revision":
+                    send_order_revision_requested(access_token, admin_email, mail_data)
+                case _:
+                    pass
+        except Exception as e:
+            current_app.logger.error(str(e))   
     except ValidationError as err:
         response["code"] = 422
         response["success"] = False
