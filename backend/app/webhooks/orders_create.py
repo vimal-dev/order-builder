@@ -9,7 +9,7 @@ from app.models.shopify.order import Order, OrderItem
 
 
 def handle(data: Dict) -> bool:
-    allowed_products = [8339432734870, 8326071353494, 8387612672150]
+    allowed_products = [8339432734870, 8326071353494, 8387612672150, 8393181003926, 8393219539094]
     is_new = False
     has_custom_design = False
     order_id = data.get("id")
