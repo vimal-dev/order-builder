@@ -3,7 +3,8 @@ export enum Status {
     DESIGN_APPROVED = "Design Approved",
     REVISION_REQUESTED = "Revision Requested",
     READY_FOR_PRODUCTION = "Ready For Production",
-    REJECTED = "Rejected"
+    REJECTED = "Rejected",
+    PROCESSING = "Processing"
 }
 
 export enum OrderStatus {

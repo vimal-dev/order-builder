@@ -9,7 +9,8 @@ import useFilter from "../../hooks/useFilter";
 import { FilterableFieldsGroupInterface } from "../../hooks/useFilter";
 import Filterable from "../../components/Filterable";
 import { IOrder } from "../../types/order";
-import { OrderStatus } from "../../enums/order";
+import { Status } from "../../enums/order";
+import classNames from "classnames";
 
 
 const OrderIndex = () => {
@@ -134,7 +135,12 @@ const OrderIndex = () => {
                                             <td>{order.order_number}</td>
                                             <td>{order.customer_name || "N/A"}</td>
                                             <td>{order.customer_email}</td>
-                                            <td><Badge className="rounded-0" bg={order?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
+                                            <td><Badge className="rounded-0" bg={classNames("", {
+                                                                                        "success": order?.status === Status.DESIGN_APPROVED || order?.status === Status.READY_FOR_PRODUCTION,
+                                                                                        "info": order?.status === Status.WAITING_FOR_APPROVAL || order?.status === Status.PROCESSING,
+                                                                                        "warning": order?.status === Status.REVISION_REQUESTED,
+                                                                                        "danger": order?.status === Status.REJECTED
+                                                                                      })}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
                                             <td><Link to={`/orders/${order.id}`}>View</Link></td>
                                         </tr>
                                     ))}

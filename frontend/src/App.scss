@@ -11,6 +11,54 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+
+.g-0.row {
+  display: block;
+  padding: 0 12px;
+}
+
+h2.mb-2.fw-50 {
+  text-align: center;
+}
+.order-details-title.card-title.h5 {
+  text-align: center;
+  background: rgb(3 46 43);
+  color: white;
+  padding-top: 10px;
+}
+p.order-details-punchline {
+  background: rgb(3 46 43);
+  margin-top: -10px;
+  text-align: center;
+  padding-bottom: 10px;
+  color: rgb(201, 166, 109);
+  padding-top: 6px;
+  font-weight: bold;
+}
+@media (max-width: 767px) {
+.d-flex.align-items-start.mb-3.border {
+  display: block !important;
+}
+}
+.d-flex.align-items-start.mb-3.border h4 {
+  display: none;
+}
+table.table.table-striped.table-bordered.table-hover thead {
+  display: none;
+} 
+img.card-img-top {
+  height: inherit;
+}
+@media (min-width: 800px) {
+.d-flex.align-items-start.mb-3.border .p-2 {
+  max-width: 500px;
+}
+}
+
+.p-2 p.item-action ~ p.item-action a {
+  color: grey !important;
+}
+
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
