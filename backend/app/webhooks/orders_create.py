@@ -51,13 +51,14 @@ def handle(data: Dict) -> bool:
         birth_stone = birth_stone[0] if len(birth_stone) > 0 else None
 
         variant_title = item.get("variant_title")
-        material = chain_length = ""
+        material = chain_length = for_whom = ""
         if variant_title:
             splitted_title = variant_title.split("/")
             if len(splitted_title) == 2:
                 material, chain_length = splitted_title
+        for_whom = "Man" if item.get("product_id", None) == 8339432734870 else "Woman"
         others = {
-            "for": "Man" if item.get("product_id", None) == "8339432734870" else "Woman",
+            "for": for_whom,
             "material": material,
             "chain_length": chain_length,
             "birth_stone": birth_stone
@@ -92,8 +93,8 @@ def handle(data: Dict) -> bool:
             "product_name": stmt.inserted.product_name,
             "title": stmt.inserted.title,
             "sku": stmt.inserted.sku,
-            "properties": properties,
-            'others': others
+            "properties": stmt.inserted.properties,
+            'others': stmt.inserted.others
         })
         db.session.execute(stmt)
     db.session.commit()
