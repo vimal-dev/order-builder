@@ -12,7 +12,8 @@ import config from "../../config";
 import { Link, useParams } from "react-router-dom";
 import Attachment from "../../components/Attachment";
 import { toast } from "react-toastify";
-import { OrderStatus } from "../../enums/order";
+import { OrderStatus, Status } from "../../enums/order";
+import classNames from "classnames";
 
 // interface IUpdateStatus{
 //     id: number | string | null;
@@ -36,12 +37,10 @@ const OrderView = () => {
     const [refresh, setRefresh] = useState<number>(0);
     const [order, setOrder] = useState<IOrder | null>(null);
     const [attachments, setAttachments] = useState<IAttachment[]>([]);
-    const [loadingAttachments, setLoadingAttachments] = useState(false);
+    const [_loadingAttachments, setLoadingAttachments] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selected_order_item, setSelectedOrderItem] = useState<IOrderItem | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    console.log(loadingAttachments)
 
     const formikUpload = useFormik({
         initialValues: {
@@ -180,7 +179,12 @@ const OrderView = () => {
                                     </td>
                                     <td>{item?.quantity}</td>
                                     <td>
-                                        <Badge className="rounded-0" bg={item?.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION? "info":"success"}>{item?.status}</Badge>
+                                        <Badge className="rounded-0" bg={classNames("", {
+                                            "success": item?.status === Status.DESIGN_APPROVED || item?.status === Status.READY_FOR_PRODUCTION,
+                                            "info": item?.status === Status.WAITING_FOR_APPROVAL || item?.status === Status.PROCESSING,
+                                            "warning": item?.status === Status.REVISION_REQUESTED,
+                                            "danger": item?.status === Status.REJECTED
+                                          })}>{item?.status}</Badge>
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (<div className="m-3"></div>)}
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (
                                             <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF</Link>

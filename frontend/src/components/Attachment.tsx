@@ -14,7 +14,8 @@ interface MediaComponentProps {
 const Attachment: React.FC<MediaComponentProps> = ({ media }) => {
   const labelClass = classNames("", {
     "success": media.status === Status.DESIGN_APPROVED || media.status === Status.READY_FOR_PRODUCTION,
-    "info": media.status === Status.WAITING_FOR_APPROVAL || media.status === Status.REVISION_REQUESTED,
+    "info": media.status === Status.WAITING_FOR_APPROVAL,
+    "warning": media.status === Status.REVISION_REQUESTED,
     "danger": media.status === Status.REJECTED
   });
 
