@@ -88,7 +88,7 @@ const OrderView = () => {
                 }
                 if (values.gift_file) {
                     formData.append("gift_file", values.gift_file);
-                }  
+                }
                 await axios.post(`/orders/dispatch/${selected_order_item?.id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -116,7 +116,7 @@ const OrderView = () => {
             const response = await axios.get(`/orders/${id}`, { params });
             setOrder(_get(response, "data.data", null));
             const order_items = _get(response, "data.data.order_items", []);
-            if(order_items && order_items?.length) {
+            if (order_items && order_items?.length) {
                 setSelectedOrderItem(order_items[0])
             }
         } catch (error) {
@@ -181,10 +181,10 @@ const OrderView = () => {
                                     <td>
                                         <Badge className="rounded-0" bg={classNames("", {
                                             "success": item?.status === Status.DESIGN_APPROVED || item?.status === Status.READY_FOR_PRODUCTION,
-                                            "info": item?.status === Status.WAITING_FOR_APPROVAL || item?.status === Status.PROCESSING,
-                                            "warning": item?.status === Status.REVISION_REQUESTED,
-                                            "danger": item?.status === Status.REJECTED
-                                          })}>{item?.status}</Badge>
+                                            "info": item?.status === Status.PROCESSING,
+                                            "warning": item?.status === Status.WAITING_FOR_APPROVAL,
+                                            "danger": item?.status === Status.REJECTED || item?.status === Status.REVISION_REQUESTED
+                                        })}>{item?.status}</Badge>
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (<div className="m-3"></div>)}
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (
                                             <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF</Link>
@@ -207,7 +207,7 @@ const OrderView = () => {
                                     <Card.Title>{selected_order_item?.title}</Card.Title>
                                     <CardText>
                                         <p><strong>Custom Design: </strong>{selected_order_item?.custom_design || "N/A"}</p>
-                                        {selected_order_item.status == OrderStatus.STATUS_PROCESSING && (
+                                        {(selected_order_item.status !== OrderStatus.STATUS_DESIGN_APPROVED &&  selected_order_item.status !== OrderStatus.STATUS_READY_FOR_PRODUCTION) && (
                                             <>
                                                 <h5>Add Design</h5>
                                                 <Form noValidate onSubmit={formikUpload.handleSubmit}>
@@ -239,7 +239,7 @@ const OrderView = () => {
                                             </>
                                         )}
 
-                                        {selected_order_item.status != OrderStatus.STATUS_PROCESSING && (
+                                        {(selected_order_item.status == OrderStatus.STATUS_DESIGN_APPROVED ||  selected_order_item.status == OrderStatus.STATUS_READY_FOR_PRODUCTION) && (
                                             <>
                                                 <h5>Dispatch & Mark production Ready</h5>
                                                 <Form noValidate onSubmit={formikDispatch.handleSubmit}>

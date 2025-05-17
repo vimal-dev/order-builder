@@ -8,7 +8,10 @@ export enum Status {
 }
 
 export enum OrderStatus {
-    STATUS_PROCESSING = "Processing",
+    STATUS_WAITING_FOR_APPROVAL = "Waiting For Approval",
     STATUS_DESIGN_APPROVED = "Design Approved",
-    STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+    STATUS_REVISION_REQUESTED = "Revision Requested",
+    STATUS_READY_FOR_PRODUCTION = "Ready For Production",
+    STATUS_REJECTED = "Rejected",
+    STATUS_PROCESSING = "Processing"
 }

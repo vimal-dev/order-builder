@@ -105,6 +105,7 @@ def update_attachment(item_id, attachment_id):
     try:
         data = UpdateAttachmentSchema().load(data)
         order_item = db.session.query(OrderItem).filter_by(id=item_id).first()
+        total_items = db.session.query(OrderItem).filter_by(order_id=order_item.order_id).count()
         attachment = db.session.query(Attachment).filter_by(id=attachment_id, order_item_id=item_id).first()
         if attachment is None:
             response["code"] = 404
@@ -113,9 +114,13 @@ def update_attachment(item_id, attachment_id):
         match(data.get("status")):
             case "Accept":
                 order_item.status = OrderItem.STATUS_DESIGN_APPROVED
-                order_item.order.status = Order.STATUS_DESIGN_APPROVED
+                if total_items == 1:
+                    order_item.order.status = Order.STATUS_DESIGN_APPROVED
                 attachment.status = Attachment.STATUS_DESIGN_APPROVED
             case "Revision":
+                order_item.status = OrderItem.STATUS_REVISION_REQUESTED
+                if total_items == 1:
+                    order_item.order.status = Order.STATUS_REVISION_REQUESTED
                 attachment.status = Attachment.STATUS_REVISION_REQUESTED
             case _:
                 current_app.logger.info("Invalid status requested")
