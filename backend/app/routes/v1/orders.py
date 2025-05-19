@@ -217,6 +217,7 @@ def add_attachment(current_user: User, item_id):
             })
             db.session.add(attachment_model)
             order_item.status = OrderItem.STATUS_WAITING_FOR_APPROVAL
+            order_item.order.status = Order.STATUS_PROCESSING
             db.session.flush()
             if attachment_model.id:
                 stmt_upd = update(Attachment).values(status=Attachment.STATUS_REVISION_REQUESTED).where(Attachment.status == Attachment.STATUS_WAITING_FOR_APPROVAL, Attachment.order_item_id == item_id, Attachment.id != attachment_model.id)
