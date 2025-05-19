@@ -187,7 +187,7 @@ const OrderView = () => {
                                         })}>{item?.status}</Badge>
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (<div className="m-3"></div>)}
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.pdf_url) && (
-                                            <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF</Link>
+                                            <Link to={item?.pdf_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download PDF/Image</Link>
                                         )}
                                         {(item?.status === OrderStatus.STATUS_READY_FOR_PRODUCTION && item?.gift_url) && (
                                             <Link to={item?.gift_url} target="_blank" className="btn btn-sm btn-success rounded-0 me-2">Download Gift Image</Link>
@@ -245,7 +245,7 @@ const OrderView = () => {
                                                 <Form noValidate onSubmit={formikDispatch.handleSubmit}>
                                                     <Form.Group className="mb-3" controlId="formBasicEmail">
                                                         <Form.Label className="text-center">
-                                                            Pdf File
+                                                            Pdf/Image File
                                                         </Form.Label>
                                                         <Form.Control
                                                             type="file"
