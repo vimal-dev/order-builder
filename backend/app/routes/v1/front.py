@@ -7,7 +7,7 @@ from app.models.shopify.order import Attachment, Order, OrderItem
 from app.validators.file import get_extension
 from app.schemas.front import OrderDetailsSchema, UpdateAttachmentSchema
 from app.tasks import order_item_updated
-from app.mail import get_outlook_token, send_order_approved, send_order_revision_requested
+from app.mail import get_outlook_token, send_customer_order_approved, send_order_approved, send_order_revision_requested
 
 router = Blueprint("front", __name__, url_prefix="o")
 
@@ -138,6 +138,17 @@ def update_attachment(item_id, attachment_id):
             match(data.get("status")):
                 case "Accept":
                     send_order_approved(access_token, admin_email, mail_data)
+                    app_url = current_app.config.get("APP_URL")
+                    if app_url:
+                        app_url = app_url.strip("/")
+                    mail_data = {
+                        "order_number": order_item.order.order_number,
+                        "app_name": current_app.config.get("APP_NAME"),
+                        "customer_name": order_item.order.customer_name,
+                        "customer_email": order_item.order.customer_email,
+                        "url": f"{app_url}/order-details"
+                    }
+                    send_customer_order_approved(access_token, order_item.order.customer_email, data=mail_data)
                 case "Revision":
                     send_order_revision_requested(access_token, admin_email, mail_data)
                 case _:
