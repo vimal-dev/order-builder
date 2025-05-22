@@ -175,6 +175,7 @@ const OrderView = () => {
                                     <td>
                                         {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
                                         <span><strong>SKU: </strong>{item?.sku}</span><br />
+                                        <span><strong>Gift Box: </strong>{item?.gift_box ? "YES":"NO"}</span><br />
                                         {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                     </td>
                                     <td>{item?.quantity}</td>

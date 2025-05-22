@@ -10,11 +10,13 @@ from app.models.shopify.order import Order, OrderItem
 
 def handle(data: Dict) -> bool:
     allowed_products = [8339432734870, 8326071353494, 8387612672150, 8393181003926, 8393219539094]
+    gift_box_product = 8335718187158
     is_new = False
     has_custom_design = False
     order_id = data.get("id")
     order_number = data.get("name")
     items = data.get("line_items", [])
+    has_gift_box = any(it.get("product_id") == gift_box_product for it in items)
     items = [it for it in items if it.get("product_id") in allowed_products]
     if len(items) <= 0:
         return True
@@ -61,7 +63,8 @@ def handle(data: Dict) -> bool:
             "for": for_whom,
             "material": material,
             "chain_length": chain_length,
-            "birth_stone": birth_stone
+            "birth_stone": birth_stone,
+            "gift_box": has_gift_box
         }
         
         isProduction = current_app.config.get("DEBUG")

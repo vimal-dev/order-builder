@@ -45,6 +45,7 @@ def serialize_order_items(item: OrderItem):
         pdf_url = f"{endpoint}/{bucket_name}/{item.pdf_file}"
     if item.gift_image:
         gift_url = f"{endpoint}/{bucket_name}/{item.gift_image}"
+    has_gift_box = True if ("gift_box" in item.others and item.others.get("gift_box") == True) else False
     return {
         "id": item.id,
         "title": item.title,
@@ -56,6 +57,7 @@ def serialize_order_items(item: OrderItem):
         "custom_design": item.custom_design,
         "pdf_url": pdf_url,
         "gift_url": gift_url,
+        "gift_box": has_gift_box,
         "created": item.created.isoformat(),
         "updated": item.updated.isoformat(),
     }

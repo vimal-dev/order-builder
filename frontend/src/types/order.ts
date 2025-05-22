@@ -14,6 +14,7 @@ export interface IOrderItem {
     status: string;
     pdf_url?: string;
     gift_url?: string;
+    gift_box?: boolean;
     custom_design?: string;
     created: string;
     updated: string;
