@@ -35,8 +35,8 @@ def shopify_webhook(f):
         webhook_data = json.loads(raw_data)
 
         # Verify the HMAC.
-        # if not _hmac_is_valid(raw_data, webhook_hmac):
-        #     raise Forbidden()
+        if not _hmac_is_valid(raw_data, webhook_hmac):
+            raise Forbidden()
 
         # Otherwise, set properties on the request object and return.
         return f(webhook_topic, webhook_data, *args, **kwargs)
