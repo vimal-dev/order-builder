@@ -50,6 +50,7 @@ class Config(object):
 
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.realpath(os.path.dirname(os.path.dirname(__file__))), "db", "database.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ECHO = False
 
     STORAGE_PATH = os.path.join(os.path.realpath(os.path.dirname(os.path.dirname(__file__))), "storage")
     UPLOAD_FOLDER = os.path.join(STORAGE_PATH, 'uploads')
