@@ -103,6 +103,10 @@ def get_outlook_token():
 
 def send_email_via_graph_api(access_token, subject, recipient, body):
     MAIL_USERNAME = current_app.config.get("MS_MAIL_USERNAME")
+    DEBUG = current_app.config.get("DEBUG")
+    DEBUG_EMAIL = current_app.config.get("DEBUG_EMAIL")
+    if DEBUG and DEBUG_EMAIL is not None:
+        recipient = DEBUG_EMAIL
     headers = {
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json'

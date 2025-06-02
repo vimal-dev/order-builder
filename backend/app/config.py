@@ -26,6 +26,8 @@ class Config(object):
     MAIL_USE_TLS = True
     MAIL_USE_SSL = False
     MAIL_DEFAULT_SENDER = 'root@localhost'
+
+    DEBUG_EMAIL = None
     
     TIMEZONE = "Asia/Kolkata"
 
