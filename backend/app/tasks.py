@@ -148,7 +148,7 @@ def serialize_order(order: Order) -> List[dict]:
                 "Material": oi.others["material"],
                 "Chain Length": oi.others["chain_length"],
                 "Birthstone Y/N": oi.others["birth_stone"],
-                "Packaging Y/N": "",
+                "Packaging Y/N": "Yes" if ("gift_box" in oi.others and oi.others.get("gift_box") == True) else "No",
                 "Chain Type": oi.others["for"],
                 "Version": "",
                 "Style": "",

@@ -45,6 +45,7 @@ def serialize_order_items(item: OrderItem):
         pdf_url = f"{endpoint}/{bucket_name}/{item.pdf_file}"
     if item.gift_image:
         gift_url = f"{endpoint}/{bucket_name}/{item.gift_image}"
+    has_gift_box = True if ("gift_box" in item.others and item.others.get("gift_box") == True) else False
     return {
         "id": item.id,
         "title": item.title,
@@ -56,6 +57,7 @@ def serialize_order_items(item: OrderItem):
         "custom_design": item.custom_design,
         "pdf_url": pdf_url,
         "gift_url": gift_url,
+        "gift_box": has_gift_box,
         "created": item.created.isoformat(),
         "updated": item.updated.isoformat(),
     }
@@ -113,19 +115,22 @@ def index(current_user: User):
     # Apply cursor-based pagination
     if "token" in options:
         if descending:
-            query = query.where(Order.created < datetime.fromisoformat(options["token"]))
+            query = query.where(Order.id < options["token"])
+            #query = query.where(Order.created < datetime.fromisoformat(options["token"]))
         else:
-            query = query.where(Order.created > datetime.fromisoformat(options["token"]))
+            query = query.where(Order.id > options["token"])
+            #query = query.where(Order.created > datetime.fromisoformat(options["token"]))
 
     # Order and limit results
-    order_by_column = desc(Order.created) if descending else asc(Order.created)
+    order_by_column = desc(Order.id) if descending else asc(Order.id)
+    #order_by_column = desc(Order.created) if descending else asc(Order.created)
     query = query.order_by(order_by_column).limit(limit)
     results = db.session.execute(query).scalars().all()
     has_next = len(results) >= limit
     response["data"]["items"] =  [serialize_order(order) for order in results]
     response["data"]["has_next"] = has_next
     if has_next:
-        next_cursor = results[-1].created.isoformat() if results else None
+        next_cursor = results[-1].id if results else None
         options["token"] = next_cursor
         response["data"]["next_token"] = encode_next_token(options)
     return jsonify(response), response["code"]
@@ -216,6 +221,8 @@ def add_attachment(current_user: User, item_id):
                 "status": Attachment.STATUS_WAITING_FOR_APPROVAL
             })
             db.session.add(attachment_model)
+            order_item.status = OrderItem.STATUS_WAITING_FOR_APPROVAL
+            order_item.order.status = Order.STATUS_WAITING_FOR_APPROVAL
             db.session.flush()
             if attachment_model.id:
                 stmt_upd = update(Attachment).values(status=Attachment.STATUS_REVISION_REQUESTED).where(Attachment.status == Attachment.STATUS_WAITING_FOR_APPROVAL, Attachment.order_item_id == item_id, Attachment.id != attachment_model.id)

@@ -137,9 +137,9 @@ const OrderIndex = () => {
                                             <td>{order.customer_email}</td>
                                             <td><Badge className="rounded-0" bg={classNames("", {
                                                                                         "success": order?.status === Status.DESIGN_APPROVED || order?.status === Status.READY_FOR_PRODUCTION,
-                                                                                        "info": order?.status === Status.WAITING_FOR_APPROVAL || order?.status === Status.PROCESSING,
-                                                                                        "warning": order?.status === Status.REVISION_REQUESTED,
-                                                                                        "danger": order?.status === Status.REJECTED
+                                                                                        "info": order?.status === Status.PROCESSING,
+                                                                                        "warning": order?.status === Status.WAITING_FOR_APPROVAL,
+                                                                                        "danger": order?.status === Status.REJECTED || order?.status === Status.REVISION_REQUESTED
                                                                                       })}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
                                             <td><Link to={`/orders/${order.id}`}>View</Link></td>
                                         </tr>

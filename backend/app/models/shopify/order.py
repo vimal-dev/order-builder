@@ -10,8 +10,11 @@ class Order(db.Model):
     __tablename__ = 'core_orders'
 
     STATUS_PROCESSING = "Processing"
+    STATUS_WAITING_FOR_APPROVAL = "Waiting For Approval"
     STATUS_DESIGN_APPROVED = "Design Approved"
+    STATUS_REVISION_REQUESTED = "Revision Requested"
     STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+    STATUS_REJECTED = "Rejected"
 
     id: Mapped[str] = mapped_column(String(190), primary_key=True)
     order_number: Mapped[str] = mapped_column(String(190))
@@ -28,8 +31,11 @@ class OrderItem(db.Model):
     __tablename__ = 'core_order_items'
 
     STATUS_PROCESSING = "Processing"
+    STATUS_WAITING_FOR_APPROVAL = "Waiting For Approval"
     STATUS_DESIGN_APPROVED = "Design Approved"
+    STATUS_REVISION_REQUESTED = "Revision Requested"
     STATUS_READY_FOR_PRODUCTION = "Ready For Production"
+    STATUS_REJECTED = "Rejected"
 
 
     id: Mapped[str] = mapped_column(String(190), primary_key=True)

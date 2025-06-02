@@ -7,7 +7,7 @@ from app.models.shopify.order import Attachment, Order, OrderItem
 from app.validators.file import get_extension
 from app.schemas.front import OrderDetailsSchema, UpdateAttachmentSchema
 from app.tasks import order_item_updated
-from app.mail import get_outlook_token, send_order_approved, send_order_revision_requested
+from app.mail import get_outlook_token, send_customer_order_approved, send_order_approved, send_order_revision_requested
 
 router = Blueprint("front", __name__, url_prefix="o")
 
@@ -105,6 +105,7 @@ def update_attachment(item_id, attachment_id):
     try:
         data = UpdateAttachmentSchema().load(data)
         order_item = db.session.query(OrderItem).filter_by(id=item_id).first()
+        total_items = db.session.query(OrderItem).filter_by(order_id=order_item.order_id).count()
         attachment = db.session.query(Attachment).filter_by(id=attachment_id, order_item_id=item_id).first()
         if attachment is None:
             response["code"] = 404
@@ -113,9 +114,13 @@ def update_attachment(item_id, attachment_id):
         match(data.get("status")):
             case "Accept":
                 order_item.status = OrderItem.STATUS_DESIGN_APPROVED
-                order_item.order.status = Order.STATUS_DESIGN_APPROVED
+                if total_items == 1:
+                    order_item.order.status = Order.STATUS_DESIGN_APPROVED
                 attachment.status = Attachment.STATUS_DESIGN_APPROVED
             case "Revision":
+                order_item.status = OrderItem.STATUS_REVISION_REQUESTED
+                if total_items == 1:
+                    order_item.order.status = Order.STATUS_REVISION_REQUESTED
                 attachment.status = Attachment.STATUS_REVISION_REQUESTED
             case _:
                 current_app.logger.info("Invalid status requested")
@@ -133,6 +138,17 @@ def update_attachment(item_id, attachment_id):
             match(data.get("status")):
                 case "Accept":
                     send_order_approved(access_token, admin_email, mail_data)
+                    app_url = current_app.config.get("APP_URL")
+                    if app_url:
+                        app_url = app_url.strip("/")
+                    mail_data = {
+                        "order_number": order_item.order.order_number,
+                        "app_name": current_app.config.get("APP_NAME"),
+                        "customer_name": order_item.order.customer_name,
+                        "customer_email": order_item.order.customer_email,
+                        "url": f"{app_url}/order-details"
+                    }
+                    send_customer_order_approved(access_token, order_item.order.customer_email, data=mail_data)
                 case "Revision":
                     send_order_revision_requested(access_token, admin_email, mail_data)
                 case _:

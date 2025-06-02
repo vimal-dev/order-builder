@@ -26,7 +26,7 @@ class UploadPdfOrGiftSchema(Schema):
         required=True, 
         allow_none=True, 
         metadata={
-            "allowed_extensions": ["pdf"]
+            "allowed_extensions": ["pdf", "jpeg", "jpg", "png", "svg"]
         }
     )
     gift_file = FileField(
