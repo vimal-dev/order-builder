@@ -15,6 +15,7 @@ import classNames from "classnames";
 
 const OrderIndex = () => {
     const [showFilterable, setShowFilterable] = useState(false);
+    const [search, setSearch] = useState("");
 
     const filterableFields: Array<FilterableFieldsGroupInterface> = [
         {
@@ -66,7 +67,9 @@ const OrderIndex = () => {
         endpoint: "/orders",
         exportIdentifier: "orders",
         exportEndpoint: "/exports/create",
-        queryParams: []
+        queryParams: {
+            "q": search
+        }
     });
 
     const toggleFilters = () => {
@@ -76,6 +79,11 @@ const OrderIndex = () => {
     useEffect(() => {
         fetchRecords();
     }, []);
+
+    useEffect(() => {
+        console.log(search);
+        fetchRecords();
+    }, [search]);
 
     const loadMore = () => {
         const next_token = _get(meta, "next_token", null);
@@ -95,6 +103,11 @@ const OrderIndex = () => {
                         <Card.Body>
                             <Card.Title>Orders</Card.Title>
                             <div className="page-actions">
+                                <div className="input-group">
+                                    <div className="form-outline" data-mdb-input-init>
+                                        <input value={search} onChange={(e) => setSearch(e.target.value)} type="search" id="form1" className="form-control" placeholder="search"/>
+                                    </div>
+                                </div>
                                 <Button className="float-end btn btn-secondary btn-sm" onClick={toggleFilters}>Filters</Button>
                                 <div className="clearfix"></div>
                             </div>
@@ -136,17 +149,17 @@ const OrderIndex = () => {
                                             <td>{order.customer_name || "N/A"}</td>
                                             <td>{order.customer_email}</td>
                                             <td><Badge className="rounded-0" bg={classNames("", {
-                                                                                        "success": order?.status === Status.DESIGN_APPROVED || order?.status === Status.READY_FOR_PRODUCTION,
-                                                                                        "info": order?.status === Status.PROCESSING,
-                                                                                        "warning": order?.status === Status.WAITING_FOR_APPROVAL,
-                                                                                        "danger": order?.status === Status.REJECTED || order?.status === Status.REVISION_REQUESTED
-                                                                                      })}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
+                                                "success": order?.status === Status.DESIGN_APPROVED || order?.status === Status.READY_FOR_PRODUCTION,
+                                                "info": order?.status === Status.PROCESSING,
+                                                "warning": order?.status === Status.WAITING_FOR_APPROVAL,
+                                                "danger": order?.status === Status.REJECTED || order?.status === Status.REVISION_REQUESTED
+                                            })}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
                                             <td><Link to={`/orders/${order.id}`}>View</Link></td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </Table>
-                            
+
                             {("next_token" in meta && meta["next_token"]) && (
                                 <Button onClick={() => loadMore()} disabled={loading}>{loading && <Spinner size="sm" animation="border" />} Load More</Button>
                             )}

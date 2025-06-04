@@ -92,8 +92,17 @@ def index(current_user: User):
         },
         "errors": {},
     }
-
+    search = request.args.get("q", None)
+    other_conditions = []
+    if search is not None and len(search) > 0:
+        other_conditions.append({
+            "column":"order_number" if search[0] == "#" else "customer_email",
+            "operator":"starts_with",
+            "query_1":search,
+            "query_2":None
+        })
     filters = json.loads(request.args.get("f", "[]"))
+    filters = other_conditions + filters
     # sorting = json.loads(request.args.get("s", "[]"))
     filter_column_types = {
         "created": "datetime"
