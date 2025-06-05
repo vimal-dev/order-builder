@@ -16,6 +16,7 @@ import classNames from "classnames";
 const OrderIndex = () => {
     const [showFilterable, setShowFilterable] = useState(false);
     const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
     const filterableFields: Array<FilterableFieldsGroupInterface> = [
         {
@@ -68,7 +69,8 @@ const OrderIndex = () => {
         exportIdentifier: "orders",
         exportEndpoint: "/exports/create",
         queryParams: {
-            "q": search
+            "q": search,
+            "s": selectedStatus.join(",")
         }
     });
 
@@ -76,14 +78,22 @@ const OrderIndex = () => {
         setShowFilterable(!showFilterable)
     };
 
+    const toggleStatus = (status: string) => {
+        setSelectedStatus((prev) =>
+          prev.includes(status)
+            ? prev.filter((s) => s !== status) // remove
+            : [...prev, status]               // add
+        );
+      };
+      
+
     useEffect(() => {
         fetchRecords();
     }, []);
 
     useEffect(() => {
-        console.log(search);
         fetchRecords();
-    }, [search]);
+    }, [search, selectedStatus]);
 
     const loadMore = () => {
         const next_token = _get(meta, "next_token", null);
@@ -103,13 +113,29 @@ const OrderIndex = () => {
                         <Card.Body>
                             <Card.Title>Orders</Card.Title>
                             <div className="page-actions">
-                                <div className="input-group">
-                                    <div className="form-outline" data-mdb-input-init>
-                                        <input value={search} onChange={(e) => setSearch(e.target.value)} type="search" id="form1" className="form-control" placeholder="search"/>
+                                <div className="d-flex flex-row align-items-center justify-content-start gap-2">
+                                    <div className="input-group" style={{ maxWidth: '300px' }}>
+                                        <input
+                                            value={search}
+                                            onChange={(e) => setSearch(e.target.value)}
+                                            type="search"
+                                            id="form1"
+                                            className="form-control"
+                                            placeholder="Search"
+                                        />
                                     </div>
+
+                                    <div className="btn-group">
+                                    {Object.values(Status).map((status) => (
+                                        <button 
+                                            onClick={(_e) => toggleStatus(status)} 
+                                            className={`btn ${selectedStatus.includes(status) ? 'btn-tertiary' : 'btn-outline-tertiary'}`}
+                                            key={status}
+                                        >{status}</button>
+                                    ))}
+                                    </div>
+                                    <Button className="float-end btn btn-secondary ms-auto" onClick={toggleFilters}>Filters</Button>
                                 </div>
-                                <Button className="float-end btn btn-secondary btn-sm" onClick={toggleFilters}>Filters</Button>
-                                <div className="clearfix"></div>
                             </div>
                             <Filterable
                                 loading={loading}
