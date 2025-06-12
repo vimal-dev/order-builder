@@ -80,6 +80,7 @@ const OrderIndex = () => {
     };
 
     const toggleStatus = (status: string) => {
+        resetNextToken();
         setSelectedStatus((prev) =>
           prev.includes(status)
             ? prev.filter((s) => s !== status) // remove
@@ -93,7 +94,6 @@ const OrderIndex = () => {
     }, []);
 
     useEffect(() => {
-        resetNextToken();
         fetchRecords();
     }, [search, selectedStatus]);
 
@@ -119,7 +119,10 @@ const OrderIndex = () => {
                                     <div className="input-group" style={{ maxWidth: '300px' }}>
                                         <input
                                             value={search}
-                                            onChange={(e) => setSearch(e.target.value)}
+                                            onChange={(e) => {
+                                                resetNextToken();
+                                                setSearch(e.target.value);
+                                            }}
                                             type="search"
                                             id="form1"
                                             className="form-control"
