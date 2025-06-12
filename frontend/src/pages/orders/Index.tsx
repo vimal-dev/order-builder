@@ -60,6 +60,7 @@ const OrderIndex = () => {
         addFilter,
         removeFilter,
         resetFilter,
+        resetNextToken,
         onFilterColumnSelectHandler,
         onFilterOperatorSelectHandler,
         onFilterValueOneChangeHandler,
@@ -92,6 +93,7 @@ const OrderIndex = () => {
     }, []);
 
     useEffect(() => {
+        resetNextToken();
         fetchRecords();
     }, [search, selectedStatus]);
 
