@@ -152,7 +152,7 @@ export interface UseFilterableProps {
     endpoint: string;
     exportIdentifier?: string;
     exportEndpoint?: string;
-    queryParams?: Array<Record<string, any>>;
+    queryParams?: Record<string, any>;
 }
 
 export interface Meta {
@@ -218,7 +218,7 @@ const useFilter = <T>(props: UseFilterableProps): UseFilterableResult<T> => {
                 ...{ next_token: next_token }
             })
         } catch (e) {
-            console.log(e)
+            // console.log(e)
         }
         setLoading(false)
     };
