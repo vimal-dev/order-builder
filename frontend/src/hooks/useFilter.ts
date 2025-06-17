@@ -228,6 +228,9 @@ const useFilter = <T>(props: UseFilterableProps): UseFilterableResult<T> => {
             setLoading(true)
             try {
                 let params: Record<string, any> = buildQuery();
+                if("next_token" in params){
+                    delete params["next_token"];
+                }
                 const data = {
                     "export_type": exportIdentifier,
                     "export_options": {

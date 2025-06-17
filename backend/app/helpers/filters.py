@@ -75,10 +75,10 @@ def build_condition(column_name, operator, query_1, query_2):
         case "ends_with":
             return column(column_name).ilike(f"%{query_1}")
         case "includes":
-            values = query_1.split(",")
+            values = query_1 if type(query_1) is list else query_1.split(",") 
             return column(column_name).in_(values)
         case "not_includes":
-            values = query_1.split(",")
+            values = query_1 if type(query_1) is list else query_1.split(",") 
             return column(column_name).notin_(values)
         case "toggle":
             return column(column_name).is_(True) if query_1 == "on" else column.is_(False)

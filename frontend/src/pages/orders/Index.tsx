@@ -11,12 +11,15 @@ import Filterable from "../../components/Filterable";
 import { IOrder } from "../../types/order";
 import { Status } from "../../enums/order";
 import classNames from "classnames";
+import { useAuthenticatedAxios } from "../../hooks/useAxios";
 
 
 const OrderIndex = () => {
+    const axios = useAuthenticatedAxios();
     const [showFilterable, setShowFilterable] = useState(false);
     const [search, setSearch] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+    const [quickExport, setQuickExport] = useState<boolean>(false);
 
     const filterableFields: Array<FilterableFieldsGroupInterface> = [
         {
@@ -87,6 +90,40 @@ const OrderIndex = () => {
             : [...prev, status]               // add
         );
       };
+
+    const quickExportHandler = async () => {
+        setQuickExport(true)
+        try {
+            let f: Array<Record<string, any>> = [];
+            if(search.length) {
+                f.push({
+                    "column": search[0] == "#"? "order_number":"customer_email",
+                    "operator": "starts_with",
+                    "query_1": search,
+                    "query_2": null,
+                })
+            }
+            if(selectedStatus.length) {
+                f.push({
+                   "column": "status",
+                    "operator": "includes",
+                    "query_1": selectedStatus,
+                    "query_2": null,
+                })
+            }
+            const data = {
+                "export_type": "orders",
+                "export_options": {
+                    "filters": f ? f:[],
+                    "sorting": []
+
+                }
+            };
+            await axios.post("/exports/create", data);
+        } catch (e) {
+        }
+        setQuickExport(false)
+    };
       
 
     useEffect(() => {
@@ -139,7 +176,10 @@ const OrderIndex = () => {
                                         >{status}</button>
                                     ))}
                                     </div>
-                                    <Button className="float-end btn btn-secondary ms-auto" onClick={toggleFilters}>Filters</Button>
+                                    <div className="ms-auto">
+                                        <Button className="float-end btn btn-secondary ms-1" onClick={toggleFilters}>Advance Filters</Button>
+                                        <Button className="float-end btn btn-tertiary" disabled={quickExport || (search.length <= 0 && selectedStatus.length <= 0)} onClick={quickExportHandler}>Export</Button>
+                                    </div>
                                 </div>
                             </div>
                             <Filterable
