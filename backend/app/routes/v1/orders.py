@@ -103,6 +103,8 @@ def index(current_user: User):
     }
     search = request.args.get("q", None)
     statusSearch = request.args.get("s", None)
+    startDate = request.args.get("startDate", None)
+    endDate = request.args.get("endDate", None)
     other_conditions = []
     if search is not None and len(search) > 0:
         other_conditions.append(
@@ -123,6 +125,35 @@ def index(current_user: User):
                 "query_2": None,
             }
         )
+
+    if (startDate is not None and len(startDate) > 0) and (endDate is not None and len(endDate) > 0):
+        other_conditions.append(
+            {
+                "column": "created",
+                "operator": "between",
+                "query_1": startDate,
+                "query_2": endDate,
+            }
+        )
+    elif (startDate is not None and len(startDate) > 0):
+        other_conditions.append(
+            {
+                "column": "created",
+                "operator": "gte",
+                "query_1": startDate,
+                "query_2": None,
+            }
+        )
+    elif (endDate is not None and len(endDate) > 0):
+        other_conditions.append(
+            {
+                "column": "created",
+                "operator": "lte",
+                "query_1": None,
+                "query_2": endDate,
+            }
+        )
+    
     filters = json.loads(request.args.get("f", "[]"))
     filters = other_conditions + filters
     # sorting = json.loads(request.args.get("s", "[]"))
