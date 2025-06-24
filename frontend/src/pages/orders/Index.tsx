@@ -12,6 +12,7 @@ import { IOrder } from "../../types/order";
 import { Status } from "../../enums/order";
 import classNames from "classnames";
 import { useAuthenticatedAxios } from "../../hooks/useAxios";
+import moment from "moment";
 
 
 const OrderIndex = () => {
@@ -20,6 +21,10 @@ const OrderIndex = () => {
     const [search, setSearch] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
     const [quickExport, setQuickExport] = useState<boolean>(false);
+    const [dateRange, setDateRange] = useState({
+        startDate: "",
+        endDate: "",
+    });
 
     const filterableFields: Array<FilterableFieldsGroupInterface> = [
         {
@@ -74,7 +79,9 @@ const OrderIndex = () => {
         exportEndpoint: "/exports/create",
         queryParams: {
             "q": search,
-            "s": selectedStatus.join(",")
+            "s": selectedStatus.join(","),
+            "startDate": dateRange.startDate,
+            "endDate": dateRange.endDate
         }
     });
 
@@ -85,36 +92,69 @@ const OrderIndex = () => {
     const toggleStatus = (status: string) => {
         resetNextToken();
         setSelectedStatus((prev) =>
-          prev.includes(status)
-            ? prev.filter((s) => s !== status) // remove
-            : [...prev, status]               // add
+            prev.includes(status)
+                ? prev.filter((s) => s !== status) // remove
+                : [...prev, status]               // add
         );
-      };
+    };
+
+    const handleDateRange = (name: string, value: string) => {
+        const dateRange = name === "startDate" ? moment(value).startOf("day").toISOString() : moment(value).endOf("day").toISOString();
+        setDateRange((prev) => ({
+            ...prev,
+            [name]: value ? dateRange : "",
+        }));
+    }
 
     const quickExportHandler = async () => {
         setQuickExport(true)
         try {
             let f: Array<Record<string, any>> = [];
-            if(search.length) {
+            if (search.length) {
                 f.push({
-                    "column": search[0] == "#"? "order_number":"customer_email",
+                    "column": search[0] == "#" ? "order_number" : "customer_email",
                     "operator": "starts_with",
                     "query_1": search,
                     "query_2": null,
                 })
             }
-            if(selectedStatus.length) {
+            if (selectedStatus.length) {
                 f.push({
-                   "column": "status",
+                    "column": "status",
                     "operator": "includes",
                     "query_1": selectedStatus,
                     "query_2": null,
                 })
             }
+            const startDate = dateRange.startDate;
+            const endDate = dateRange.endDate;
+            if (startDate && startDate.length > 0 && endDate && endDate.length > 0) {
+                f.push({
+                    column: "created",
+                    operator: "between",
+                    query_1: startDate,
+                    query_2: endDate,
+                });
+            } else if (startDate && startDate.length > 0) {
+                f.push({
+                    column: "created",
+                    operator: "gte",
+                    query_1: startDate,
+                    query_2: null,
+                });
+            } else if (endDate && endDate.length > 0) {
+                f.push({
+                    column: "created",
+                    operator: "lte",
+                    query_1: null,
+                    query_2: endDate,
+                });
+            }
+
             const data = {
                 "export_type": "orders",
                 "export_options": {
-                    "filters": f ? f:[],
+                    "filters": f ? f : [],
                     "sorting": []
 
                 }
@@ -124,7 +164,7 @@ const OrderIndex = () => {
         }
         setQuickExport(false)
     };
-      
+
 
     useEffect(() => {
         fetchRecords();
@@ -132,7 +172,7 @@ const OrderIndex = () => {
 
     useEffect(() => {
         fetchRecords();
-    }, [search, selectedStatus]);
+    }, [search, selectedStatus, dateRange]);
 
     const loadMore = () => {
         const next_token = _get(meta, "next_token", null);
@@ -168,17 +208,31 @@ const OrderIndex = () => {
                                     </div>
 
                                     <div className="btn-group">
-                                    {Object.values(Status).map((status) => (
-                                        <button 
-                                            onClick={(_e) => toggleStatus(status)} 
-                                            className={`btn ${selectedStatus.includes(status) ? 'btn-tertiary' : 'btn-outline-tertiary'}`}
-                                            key={status}
-                                        >{status}</button>
-                                    ))}
+                                        {Object.values(Status).map((status) => (
+                                            <button
+                                                onClick={(_e) => toggleStatus(status)}
+                                                className={`btn ${selectedStatus.includes(status) ? 'btn-tertiary' : 'btn-outline-tertiary'}`}
+                                                key={status}
+                                            >{status}</button>
+                                        ))}
+                                    </div>
+                                    <div className="input-group" style={{ maxWidth: '300px' }}>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            name="startDate"
+                                            onChange={(e) => handleDateRange(e.target.name, e.target.value)}
+                                        />
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            name="endDate"
+                                            onChange={(e) => handleDateRange(e.target.name, e.target.value)}
+                                        />
                                     </div>
                                     <div className="ms-auto">
                                         <Button className="float-end btn btn-secondary ms-1" onClick={toggleFilters}>Advance Filters</Button>
-                                        <Button className="float-end btn btn-tertiary" disabled={quickExport || (search.length <= 0 && selectedStatus.length <= 0)} onClick={quickExportHandler}>Export</Button>
+                                        <Button className="float-end btn btn-tertiary" disabled={quickExport || (search.length <= 0 && selectedStatus.length <= 0 && dateRange.startDate.length <= 0 && dateRange.endDate.length <= 0)} onClick={quickExportHandler}>Export</Button>
                                     </div>
                                 </div>
                             </div>
@@ -224,7 +278,7 @@ const OrderIndex = () => {
                                                 "info": order?.status === Status.PROCESSING,
                                                 "warning": order?.status === Status.WAITING_FOR_APPROVAL,
                                                 "danger": order?.status === Status.REJECTED || order?.status === Status.REVISION_REQUESTED
-                                            })}>{order?.status}</Badge> <br />{new Date(order.updated).toLocaleString()}</td>
+                                            })}>{order?.status}</Badge> <br />{new Date(order.created).toLocaleString()}</td>
                                             <td><Link to={`/orders/${order.id}`}>View</Link></td>
                                         </tr>
                                     ))}
