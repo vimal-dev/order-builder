@@ -48,7 +48,7 @@
     <div class="email-container">
         <h2>Hi Team,</h2>
         <p>Customer has requested a revision for Order: {{order_number}}. </p>
-
+        <p>{{item.name}} {% if item.title %} [{{item.title}}] {% endif %}: REVISION REQUESTED</p>
         <p>{{comment}}</p>
               
         <p><strong>Evelyn | {{app_name}}</strong><br>Customer Support Team</p>
