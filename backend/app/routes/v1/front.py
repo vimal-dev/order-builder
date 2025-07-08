@@ -131,6 +131,10 @@ def update_attachment(item_id, attachment_id):
             mail_data = {
                 "order_number": order_item.order.order_number,
                 "app_name": current_app.config.get("APP_NAME"),
+                "item": {
+                    "name": order_item.product_name,
+                    "title": order_item.title
+                },
                 "comment": data.get("comment")
             }
             access_token = get_outlook_token()
