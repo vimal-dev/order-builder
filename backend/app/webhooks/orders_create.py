@@ -13,6 +13,7 @@ def handle(data: Dict) -> bool:
     gift_box_product = 8335718187158
     is_new = False
     has_custom_design = False
+    has_selected_design = False
     order_id = data.get("id")
     order_number = data.get("name")
     items = data.get("line_items", [])
@@ -49,6 +50,9 @@ def handle(data: Dict) -> bool:
         custom_design = [p.get("value") for p in properties if p["name"] == "Custom_design"]
         custom_design = custom_design[0] if len(custom_design) > 0 else None
 
+        selected_design = [p.get("value") for p in properties if p["name"] == "Selected_design"]
+        selected_design = selected_design[0] if len(selected_design) > 0 else None
+
         birth_stone = [p.get("value") for p in properties if p["name"] == "Extra charm"]
         birth_stone = birth_stone[0] if len(birth_stone) > 0 else None
 
@@ -68,7 +72,7 @@ def handle(data: Dict) -> bool:
         }
         
         isProduction = current_app.config.get("DEBUG")
-        if isProduction and custom_design is None:
+        if isProduction and custom_design is None and selected_design is None:
             continue
         raw_data = {
             'id': item.get('id'),
@@ -80,12 +84,13 @@ def handle(data: Dict) -> bool:
             'sku': item.get('sku'),
             'properties': properties,
             'others': others,
-            'status': OrderItem.STATUS_PROCESSING,
+            'status': OrderItem.STATUS_DESIGN_APPROVED if selected_design is not None else OrderItem.STATUS_PROCESSING,
             "created": datetime.now(timezone.utc),
             "updated": datetime.now(timezone.utc)
         }
         order_items.append(raw_data)
         has_custom_design = True if(not has_custom_design and custom_design is not None) else False
+        has_selected_design = True if(not has_selected_design and selected_design is not None) else False
         if total_gift_boxes > 0:
             total_gift_boxes -= 1
             

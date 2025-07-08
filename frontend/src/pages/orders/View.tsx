@@ -176,7 +176,7 @@ const OrderView = () => {
                                         {item?.product_name}{item?.title ? <><br />{item?.title}</> : ''}<br />
                                         <span><strong>SKU: </strong>{item?.sku}</span><br />
                                         <span><strong>Gift Box: </strong>{item?.gift_box ? "YES":"NO"}</span><br />
-                                        {item?.properties.map(property => (<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
+                                        {item?.properties.map(property => property.name == "Selected_design" && property.value? (<><span><strong>{property.name}: </strong><br /><img src={property.value} width="240px" /></span><br /></>):(<><span><strong>{property.name}: </strong>{property.value}</span><br /></>))}
                                     </td>
                                     <td>{item?.quantity}</td>
                                     <td>
