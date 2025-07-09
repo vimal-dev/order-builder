@@ -84,7 +84,7 @@ def handle(data: Dict) -> bool:
             'sku': item.get('sku'),
             'properties': properties,
             'others': others,
-            'status': OrderItem.STATUS_DESIGN_APPROVED if selected_design is not None else OrderItem.STATUS_PROCESSING,
+            'status': OrderItem.STATUS_DESIGN_APPROVED if (selected_design is not None and custom_design is None) else OrderItem.STATUS_PROCESSING,
             "created": datetime.now(timezone.utc),
             "updated": datetime.now(timezone.utc)
         }
