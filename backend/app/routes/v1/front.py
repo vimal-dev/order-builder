@@ -133,7 +133,8 @@ def update_attachment(item_id, attachment_id):
                 "app_name": current_app.config.get("APP_NAME"),
                 "item": {
                     "name": order_item.product_name,
-                    "title": order_item.title
+                    "title": order_item.title,
+                    "custom_design": order_item.custom_design
                 },
                 "comment": data.get("comment")
             }
